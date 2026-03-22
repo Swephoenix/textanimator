@@ -1,0 +1,1359 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trailer Animator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Bebas+Neue&family=Cinzel:wght@400;700;900&family=Montserrat:wght@400;700;900&family=Oswald:wght@400;700&family=Playfair+Display:wght@400;700;900&family=Roboto+Condensed:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 50%, #f5f7fa 100%);
+            color: #333;
+            min-height: 100vh;
+            display: flex;
+        }
+
+        /* Left Sidebar - Text Input */
+        .sidebar {
+            width: 400px;
+            min-height: 100vh;
+            background: linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%);
+            padding: 30px;
+            border-right: 1px solid #e0e0e0;
+            box-shadow: 5px 0 20px rgba(0,0,0,0.08);
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .sidebar-header {
+            text-align: center;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .sidebar-header h2 {
+            font-size: 24px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .sidebar-header p {
+            font-size: 12px;
+            color: #888;
+            margin-top: 8px;
+        }
+
+        .text-input-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .text-input-container label {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .text-input-container label span {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #666;
+        }
+
+        .text-input-container textarea {
+            width: 100%;
+            height: 400px;
+            padding: 16px;
+            border: 2px solid #e8e8e8;
+            border-radius: 12px;
+            font-size: 15px;
+            background: #fafafa;
+            color: #333;
+            font-family: inherit;
+            resize: vertical;
+            transition: all 0.3s ease;
+            line-height: 1.6;
+        }
+
+        .text-input-container textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 20px rgba(102,126,234,0.2);
+            background: #fff;
+        }
+
+        .text-input-container textarea::placeholder {
+            color: #bbb;
+        }
+
+        .word-count {
+            font-size: 13px;
+            color: #888;
+            text-align: right;
+            padding: 10px 14px;
+            background: #f5f5f5;
+            border-radius: 8px;
+            border: 1px solid #e8e8e8;
+        }
+
+        .word-count span {
+            color: #667eea;
+            font-weight: 700;
+        }
+
+        /* Top Controls Bar */
+        .controls-bar {
+            position: fixed;
+            top: 0;
+            left: 400px;
+            right: 0;
+            padding: 20px 30px;
+            background: linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+            justify-content: center;
+            border-bottom: 1px solid #e8e8e8;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+            z-index: 100;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #fafafa;
+            padding: 12px 16px;
+            border-radius: 12px;
+            border: 1px solid #e8e8e8;
+            transition: all 0.3s ease;
+        }
+
+        .control-group:hover {
+            background: #fff;
+            border-color: #667eea;
+            box-shadow: 0 4px 12px rgba(102,126,234,0.15);
+            transform: translateY(-1px);
+        }
+
+        .control-group label {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #666;
+        }
+
+        .control-group input[type="text"],
+        .control-group textarea,
+        .control-group select {
+            padding: 10px 14px;
+            border: 1px solid #d0d0d0;
+            border-radius: 8px;
+            font-size: 14px;
+            background: #fff;
+            color: #333;
+            font-family: inherit;
+            transition: all 0.3s ease;
+        }
+
+        .control-group textarea {
+            min-width: 350px;
+            height: 70px;
+            resize: vertical;
+        }
+
+        .control-group input[type="text"]:focus,
+        .control-group textarea:focus,
+        .control-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 12px rgba(102,126,234,0.25);
+        }
+
+        .control-group select {
+            cursor: pointer;
+            min-width: 120px;
+        }
+
+        .control-group input[type="color"] {
+            width: 45px;
+            height: 35px;
+            border: 2px solid #d0d0d0;
+            border-radius: 8px;
+            cursor: pointer;
+            background: #fff;
+            transition: all 0.3s ease;
+        }
+
+        .control-group input[type="color"]:hover {
+            border-color: #667eea;
+            transform: scale(1.05);
+        }
+
+        .control-group input[type="range"] {
+            width: 120px;
+            height: 6px;
+            -webkit-appearance: none;
+            background: #e0e0e0;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        .control-group input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 6px rgba(102,126,234,0.4);
+        }
+
+        .control-group input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        .control-group .value-display {
+            font-size: 13px;
+            font-weight: 700;
+            color: #667eea;
+            min-width: 50px;
+            text-align: center;
+        }
+
+        .btn {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102,126,234,0.35);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(102,126,234,0.5);
+        }
+
+        .btn-record {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(17,153,142,0.35);
+        }
+
+        .btn-record:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(17,153,142,0.5);
+        }
+
+        .btn-stop {
+            background: linear-gradient(135deg, #6c757d 0%, #868e96 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(108,117,125,0.35);
+        }
+
+        .btn-stop:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(108,117,125,0.5);
+        }
+
+        .btn:disabled {
+            background: linear-gradient(135deg, #c0c0c0 0%, #d0d0d0 100%);
+            cursor: not-allowed;
+            opacity: 0.7;
+            box-shadow: none;
+        }
+
+        .btn.recording {
+            background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
+            animation: pulse-btn 1.5s infinite;
+        }
+
+        @keyframes pulse-btn {
+            0%, 100% { box-shadow: 0 4px 15px rgba(235,51,73,0.4); }
+            50% { box-shadow: 0 4px 25px rgba(235,51,73,0.7); }
+        }
+
+        #canvas-container {
+            position: fixed;
+            top: 100px;
+            left: 400px;
+            right: 0;
+            bottom: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        canvas {
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15), 0 0 80px rgba(102,126,234,0.1);
+            border-radius: 8px;
+            overflow: hidden;
+            max-height: 100%;
+            max-width: 100%;
+        }
+
+        .status-bar {
+            position: fixed;
+            bottom: 0;
+            left: 400px;
+            right: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 30px;
+            background: #fff;
+            border-top: 1px solid #e8e8e8;
+            font-size: 13px;
+        }
+
+        .status-text {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: #38ef7d;
+            border-radius: 50%;
+        }
+
+        .recording-indicator {
+            display: none;
+            align-items: center;
+            gap: 10px;
+            color: #eb3349;
+            font-weight: 700;
+        }
+
+        .recording-indicator.active {
+            display: flex;
+        }
+
+        .recording-dot {
+            width: 14px;
+            height: 14px;
+            background: #eb3349;
+            border-radius: 50%;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.1); }
+        }
+
+        .section-title {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #999;
+            margin-bottom: 5px;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .file-label {
+            padding: 10px 16px;
+            background: #f5f5f5;
+            border: 1px dashed #ccc;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.3s ease;
+        }
+
+        .file-label:hover {
+            background: #fff;
+            border-color: #667eea;
+        }
+
+        .file-name {
+            font-size: 12px;
+            color: #999;
+            margin-top: 5px;
+        }
+
+        /* Timeline */
+        .timeline-container {
+            position: fixed;
+            bottom: 50px;
+            left: 400px;
+            right: 0;
+            height: 100px;
+            background: #fff;
+            border-top: 1px solid #e8e8e8;
+            overflow-x: auto;
+            overflow-y: hidden;
+        }
+
+        .timeline {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 15px 20px;
+            height: 100%;
+        }
+
+        .timeline-slide {
+            min-width: 140px;
+            height: 70px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%);
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .timeline-slide:hover {
+            border-color: #667eea;
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(102,126,234,0.2);
+        }
+
+        .timeline-slide.active {
+            border-color: #667eea;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            box-shadow: 0 4px 15px rgba(102,126,234,0.4);
+        }
+
+        .timeline-slide.active .slide-text {
+            color: #fff;
+        }
+
+        .slide-text {
+            font-size: 11px;
+            text-align: center;
+            color: #555;
+            line-height: 1.3;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            max-width: 100%;
+        }
+
+        .slide-number {
+            position: absolute;
+            top: 4px;
+            left: 6px;
+            font-size: 9px;
+            font-weight: 700;
+            color: #999;
+            background: rgba(255,255,255,0.8);
+            padding: 2px 5px;
+            border-radius: 4px;
+        }
+
+        .timeline-slide.active .slide-number {
+            color: #667eea;
+        }
+
+        .timeline::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .timeline::-webkit-scrollbar-track {
+            background: #f5f5f5;
+        }
+
+        .timeline::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 4px;
+        }
+
+        .timeline::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+        }
+    </style>
+</head>
+<body>
+    <!-- Left Sidebar - Text Input -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <h2>🎬 Trailer</h2>
+            <p>Skriv din text här</p>
+        </div>
+        
+        <div class="text-input-container">
+            <label>
+                <span>Textinnehåll</span>
+                <textarea id="textInput" placeholder="Skriv eller klistra in din text här...">I EN VÄRLD DÅRKRAFTEN RÅDER EN MAN STÅR UPP FÖR RÄTTVISAN DETTA ÄR HISTORIEN OM EN HjÄLTE SOM KOMMER ATT FÖRÄNDRA ALLT</textarea>
+            </label>
+            <div class="word-count">
+                Ord: <span id="wordCount">0</span>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Top Controls Bar -->
+    <div class="controls-bar">
+        <div class="control-group">
+            <label>
+                <span class="section-title">Bakgrund</span>
+                Typ
+            </label>
+            <select id="bgType">
+                <option value="solid">Enfärgad</option>
+                <option value="gradient">Gradient</option>
+                <option value="image">Bild</option>
+            </select>
+        </div>
+
+        <div class="control-group color-input">
+            <label>
+                <span class="section-title">Färg 1</span>
+                <input type="color" id="color1" value="#000000">
+            </label>
+        </div>
+
+        <div class="control-group color-input">
+            <label>
+                <span class="section-title">Färg 2</span>
+                <input type="color" id="color2" value="#1a1a2e">
+            </label>
+        </div>
+
+        <div class="control-group image-input" style="display: none;">
+            <label>
+                <span class="section-title">Bakgrundsbild</span>
+                <label class="file-label" for="bgImage">📁 Välj bild</label>
+                <input type="file" id="bgImage" accept="image/*">
+                <div class="file-name" id="fileName">Ingen bild vald</div>
+            </label>
+        </div>
+
+        <div class="control-group">
+            <label>
+                <span class="section-title">Utseende</span>
+                Textfärg
+            </label>
+            <input type="color" id="textColor" value="#ffffff">
+        </div>
+
+        <div class="control-group">
+            <label>
+                <span class="section-title">Typsnitt</span>
+                Stil
+            </label>
+            <select id="fontFamily">
+                <option value="Anton">Anton (Bold)</option>
+                <option value="Bebas Neue">Bebas Neue</option>
+                <option value="Cinzel">Cinzel (Cinematic)</option>
+                <option value="Montserrat">Montserrat (Modern)</option>
+                <option value="Oswald">Oswald</option>
+                <option value="Playfair Display">Playfair Display (Elegant)</option>
+                <option value="Roboto Condensed">Roboto Condensed</option>
+            </select>
+        </div>
+
+        <div class="control-group">
+            <label>
+                <span class="section-title">Effekt</span>
+                Övergång
+            </label>
+            <select id="transition">
+                <option value="none">Ingen</option>
+                <option value="fade">Fade</option>
+                <option value="slide">Slide</option>
+                <option value="zoom">Zoom</option>
+                <option value="blur">Blur</option>
+                <option value="glitch">Glitch</option>
+                <option value="cinematic">🎬 Cinematic</option>
+            </select>
+        </div>
+
+        <div class="control-group">
+            <label>
+                <span class="section-title">Timing</span>
+                Hastighet
+            </label>
+            <input type="range" id="speed" min="100" max="3000" value="1200">
+            <span class="value-display" id="speedValue">1200ms</span>
+        </div>
+
+        <div class="control-group">
+            <label>
+                <span class="section-title">Hastighet</span>
+                Variation
+            </label>
+            <select id="speedVariation">
+                <option value="none">Konstant</option>
+                <option value="low">Liten (±20%)</option>
+                <option value="medium">Medium (±40%)</option>
+                <option value="high">Hög (±60%)</option>
+                <option value="extreme">Extrem (±80%)</option>
+                <option value="random">Slump (500-2500ms)</option>
+            </select>
+        </div>
+
+        <div class="control-group">
+            <label>
+                <span class="section-title">Visning</span>
+                Ord per gång
+            </label>
+            <input type="range" id="wordsPerFrame" min="1" max="5" value="2">
+            <span class="value-display" id="wordsPerFrameValue">2</span>
+        </div>
+
+        <div class="control-group cinematic-options" style="display: none;">
+            <label>
+                <span class="section-title">Cinematic</span>
+                Markera viktiga ord
+            </label>
+            <input type="text" id="highlightWords" placeholder="t.ex. system,rättigheter,frihet" style="width: 200px;">
+        </div>
+
+        <button class="btn btn-primary" id="playBtn">▶ Spela</button>
+        <button class="btn btn-stop" id="stopBtn">■ Stoppa</button>
+        <div style="flex: 1;"></div>
+        <button class="btn btn-record" id="recordBtn">● Spela in</button>
+    </div>
+
+    <div id="canvas-container">
+        <canvas id="canvas" width="1920" height="1080"></canvas>
+    </div>
+
+    <div class="timeline-container">
+        <div class="timeline" id="timeline"></div>
+    </div>
+
+    <div class="status-bar">
+        <div class="status-text">
+            <span class="status-dot" id="statusDot"></span>
+            <span id="statusText">Klar att börja</span>
+        </div>
+        <div class="recording-indicator" id="recordingIndicator">
+            <span class="recording-dot"></span>
+            <span>● SPER IN...</span>
+        </div>
+        <div id="frameCounter"></div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const textInput = document.getElementById('textInput');
+        const wordCount = document.getElementById('wordCount');
+        const timeline = document.getElementById('timeline');
+        const bgType = document.getElementById('bgType');
+        const color1 = document.getElementById('color1');
+        const color2 = document.getElementById('color2');
+        const bgImage = document.getElementById('bgImage');
+        const fileName = document.getElementById('fileName');
+        const textColor = document.getElementById('textColor');
+        const fontFamily = document.getElementById('fontFamily');
+        const transition = document.getElementById('transition');
+        const speed = document.getElementById('speed');
+        const speedValue = document.getElementById('speedValue');
+        const speedVariation = document.getElementById('speedVariation');
+        const wordsPerFrame = document.getElementById('wordsPerFrame');
+        const wordsPerFrameValue = document.getElementById('wordsPerFrameValue');
+        const highlightWordsInput = document.getElementById('highlightWords');
+        const cinematicOptions = document.querySelector('.cinematic-options');
+        const playBtn = document.getElementById('playBtn');
+        const recordBtn = document.getElementById('recordBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const statusText = document.getElementById('statusText');
+        const recordingIndicator = document.getElementById('recordingIndicator');
+        const frameCounter = document.getElementById('frameCounter');
+
+        let words = [];
+        let currentIndex = 0;
+        let isPlaying = false;
+        let isRecording = false;
+        let playbackTimeout = null;
+        let loadedBgImage = null;
+        let mediaRecorder = null;
+        let recordedChunks = [];
+        let transitionProgress = 0;
+        let animationFrame = null;
+        let slideStartTime = 0;
+        let currentSlideDuration = 0;
+
+        // Show/hide inputs based on background type
+        bgType.addEventListener('change', () => {
+            document.querySelectorAll('.color-input').forEach(el => {
+                el.style.display = bgType.value === 'solid' || bgType.value === 'gradient' ? 'flex' : 'none';
+            });
+            document.querySelector('.image-input').style.display = bgType.value === 'image' ? 'flex' : 'none';
+            drawFrame();
+        });
+
+        // Show/hide cinematic options
+        transition.addEventListener('change', () => {
+            cinematicOptions.style.display = transition.value === 'cinematic' ? 'flex' : 'none';
+        });
+
+        bgImage.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                fileName.textContent = file.name;
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        loadedBgImage = img;
+                        drawFrame();
+                    };
+                    img.src = event.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        speed.addEventListener('input', () => {
+            speedValue.textContent = speed.value + 'ms';
+        });
+
+        function getVariedSpeed(baseSpeed) {
+            const variation = speedVariation.value;
+            let minMultiplier, maxMultiplier;
+            
+            switch (variation) {
+                case 'low':
+                    minMultiplier = 0.8;
+                    maxMultiplier = 1.2;
+                    break;
+                case 'medium':
+                    minMultiplier = 0.6;
+                    maxMultiplier = 1.4;
+                    break;
+                case 'high':
+                    minMultiplier = 0.4;
+                    maxMultiplier = 1.6;
+                    break;
+                case 'extreme':
+                    minMultiplier = 0.2;
+                    maxMultiplier = 1.8;
+                    break;
+                case 'random':
+                    return Math.random() * 2000 + 500; // 500-2500ms
+                default: // none
+                    return baseSpeed;
+            }
+            
+            const multiplier = Math.random() * (maxMultiplier - minMultiplier) + minMultiplier;
+            return Math.round(baseSpeed * multiplier);
+        }
+
+        wordsPerFrame.addEventListener('input', () => {
+            wordsPerFrameValue.textContent = wordsPerFrame.value;
+            updateWordCount();
+        });
+
+        function getWords() {
+            const text = textInput.value.trim();
+            return text.split(/\s+/).filter(w => w.length > 0);
+        }
+
+        function updateWordCount() {
+            const words = getWords();
+            wordCount.textContent = words.length;
+            buildTimeline(words);
+        }
+
+        function buildTimeline(words) {
+            const wordsCount = parseInt(wordsPerFrame.value);
+            timeline.innerHTML = '';
+            
+            for (let i = 0; i < words.length; i += wordsCount) {
+                const frameWords = [];
+                for (let j = 0; j < wordsCount && i + j < words.length; j++) {
+                    frameWords.push(words[i + j]);
+                }
+                
+                const slide = document.createElement('div');
+                slide.className = 'timeline-slide';
+                slide.dataset.index = i;
+                
+                const slideNumber = document.createElement('span');
+                slideNumber.className = 'slide-number';
+                slideNumber.textContent = Math.floor(i / wordsCount) + 1;
+                
+                const slideText = document.createElement('span');
+                slideText.className = 'slide-text';
+                slideText.textContent = frameWords.join(' ');
+                
+                slide.appendChild(slideNumber);
+                slide.appendChild(slideText);
+                
+                slide.addEventListener('click', () => {
+                    if (!isPlaying && !isRecording) {
+                        currentIndex = i;
+                        drawFrame();
+                        updateTimelineActive();
+                    }
+                });
+                
+                timeline.appendChild(slide);
+            }
+        }
+
+        function updateTimelineActive() {
+            const slides = document.querySelectorAll('.timeline-slide');
+            slides.forEach(slide => {
+                const index = parseInt(slide.dataset.index);
+                if (index === currentIndex) {
+                    slide.classList.add('active');
+                    slide.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                } else {
+                    slide.classList.remove('active');
+                }
+            });
+        }
+
+        textInput.addEventListener('input', updateWordCount);
+        updateWordCount();
+
+        function drawBackground() {
+            if (bgType.value === 'solid') {
+                ctx.fillStyle = color1.value;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            } else if (bgType.value === 'gradient') {
+                const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+                gradient.addColorStop(0, color1.value);
+                gradient.addColorStop(1, color2.value);
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            } else if (bgType.value === 'image' && loadedBgImage) {
+                const scale = Math.max(canvas.width / loadedBgImage.width, canvas.height / loadedBgImage.height);
+                const x = (canvas.width - loadedBgImage.width * scale) / 2;
+                const y = (canvas.height - loadedBgImage.height * scale) / 2;
+                ctx.drawImage(loadedBgImage, x, y, loadedBgImage.width * scale, loadedBgImage.height * scale);
+                
+                // Add dark overlay for better text readability
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            } else {
+                const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+                gradient.addColorStop(0, '#0a0a0a');
+                gradient.addColorStop(1, '#1a1a2e');
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            }
+        }
+
+        function applyTransitionEffect(progress, text, x, y, fontSize) {
+            const transType = transition.value;
+            
+            if (transType === 'none') {
+                ctx.globalAlpha = 1;
+                ctx.fillText(text, x, y);
+                return;
+            }
+
+            ctx.save();
+
+            if (transType === 'fade') {
+                ctx.globalAlpha = Math.min(1, progress * 2);
+                ctx.fillText(text, x, y);
+            } else if (transType === 'slide') {
+                const slideX = x - (1 - Math.min(1, progress * 2)) * 100;
+                ctx.globalAlpha = Math.min(1, progress * 2);
+                ctx.fillText(text, slideX, y);
+            } else if (transType === 'zoom') {
+                const scale = 0.5 + Math.min(0.5, progress);
+                ctx.translate(x, y);
+                ctx.scale(scale, scale);
+                ctx.globalAlpha = Math.min(1, progress * 2);
+                ctx.fillText(text, 0, 0);
+            } else if (transType === 'blur') {
+                const blurAmount = 20 * (1 - Math.min(1, progress * 2));
+                ctx.filter = `blur(${blurAmount}px)`;
+                ctx.globalAlpha = Math.min(1, progress * 2);
+                ctx.fillText(text, x, y);
+            } else if (transType === 'glitch') {
+                ctx.globalAlpha = Math.min(1, progress * 2);
+                
+                // Create glitch effect
+                const glitchOffset = Math.sin(progress * Math.PI * 10) * 10;
+                ctx.fillStyle = 'rgba(255, 0, 0, 0.5)';
+                ctx.fillText(text, x + glitchOffset, y);
+                ctx.fillStyle = 'rgba(0, 255, 255, 0.5)';
+                ctx.fillText(text, x - glitchOffset, y);
+                ctx.fillStyle = textColor.value;
+                ctx.fillText(text, x, y);
+            }
+
+            ctx.restore();
+        }
+
+        function drawFrame(transitionProg = 1) {
+            drawBackground();
+
+            if (words.length === 0) {
+                words = getWords();
+            }
+
+            if (currentIndex >= words.length) {
+                return;
+            }
+
+            const wordsCount = parseInt(wordsPerFrame.value);
+            const frameWords = [];
+            for (let i = 0; i < wordsCount && currentIndex + i < words.length; i++) {
+                frameWords.push(words[currentIndex + i]);
+            }
+            const text = frameWords.join(' ');
+
+            // Cinematic mode - render with effects
+            if (transition.value === 'cinematic') {
+                drawCinematicFrame(text, transitionProg);
+                return;
+            }
+
+            // Text styling
+            ctx.fillStyle = textColor.value;
+            ctx.font = `bold 120px '${fontFamily.value}', sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            // Add text shadow for cinematic effect
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
+            ctx.shadowBlur = 30;
+            ctx.shadowOffsetX = 5;
+            ctx.shadowOffsetY = 5;
+
+            // Draw text centered with transition
+            applyTransitionEffect(transitionProg, text, canvas.width / 2, canvas.height / 2, 120);
+
+            // Reset shadow
+            ctx.shadowColor = 'transparent';
+            ctx.shadowBlur = 0;
+            ctx.shadowOffsetX = 0;
+            ctx.shadowOffsetY = 0;
+            ctx.globalAlpha = 1;
+            ctx.filter = 'none';
+
+            // Add film grain overlay (subtle)
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.015)';
+            for (let i = 0; i < 800; i++) {
+                const x = Math.random() * canvas.width;
+                const y = Math.random() * canvas.height;
+                ctx.fillRect(x, y, 2, 2);
+            }
+
+            // Add subtle vignette
+            const gradient = ctx.createRadialGradient(
+                canvas.width / 2, canvas.height / 2, canvas.height / 3,
+                canvas.width / 2, canvas.height / 2, canvas.height
+            );
+            gradient.addColorStop(0, 'rgba(0, 0, 0, 0)');
+            gradient.addColorStop(1, 'rgba(0, 0, 0, 0.4)');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+
+        function drawCinematicFrame(text, progress) {
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const fontSize = 80;
+            
+            ctx.save();
+            
+            // Subtle zoom effect
+            const scale = 0.95 + (progress * 0.1);
+            ctx.translate(centerX, centerY);
+            ctx.scale(scale, scale);
+            ctx.translate(-centerX, -centerY);
+
+            // Set font once
+            ctx.font = `700 ${fontSize}px '${fontFamily.value}', sans-serif`;
+            ctx.textBaseline = 'middle';
+            
+            // Measure full text once
+            const fullTextWidth = ctx.measureText(text).width;
+            
+            // Typing effect using clip-path simulation
+            const revealWidth = fullTextWidth * Math.min(1, progress * 3);
+            
+            ctx.save();
+            ctx.beginPath();
+            ctx.rect(centerX - fullTextWidth / 2, centerY - fontSize, revealWidth + fullTextWidth / 2, fontSize * 2.5);
+            ctx.clip();
+
+            // Split text into words and check for highlights
+            const highlightList = highlightWordsInput.value.toLowerCase().split(',').map(w => w.trim()).filter(w => w);
+            const textParts = text.split(' ');
+            
+            // Pre-calculate word widths
+            const spaceWidth = ctx.measureText(' ').width;
+            const wordWidths = textParts.map(word => ({
+                word: word,
+                width: ctx.measureText(word).width
+            }));
+            
+            const totalWidth = wordWidths.reduce((sum, w) => sum + w.width, 0) + (wordWidths.length - 1) * spaceWidth;
+            let currentX = centerX - totalWidth / 2;
+            
+            // Check if we're past the highlight point
+            const isHighlighted = progress > 0.65;
+            
+            for (let i = 0; i < wordWidths.length; i++) {
+                const { word, width } = wordWidths[i];
+                const shouldHighlight = highlightList.some(hw => word.toLowerCase().includes(hw));
+                
+                if (shouldHighlight && isHighlighted) {
+                    // Highlighted word - golden with glow
+                    ctx.fillStyle = '#fbbf24';
+                    ctx.shadowColor = 'rgba(251, 191, 36, 0.5)';
+                    ctx.shadowBlur = 20;
+                    ctx.shadowOffsetX = 0;
+                    ctx.shadowOffsetY = 0;
+                    ctx.filter = 'none';
+                } else {
+                    // Normal or dimmed word
+                    if (isHighlighted) {
+                        ctx.fillStyle = 'rgba(248, 250, 252, 0.1)';
+                        ctx.filter = 'blur(6px)';
+                    } else {
+                        ctx.fillStyle = '#f8fafc';
+                        ctx.filter = 'none';
+                    }
+                    ctx.shadowColor = 'transparent';
+                    ctx.shadowBlur = 0;
+                }
+                
+                ctx.fillText(word, currentX + width / 2, centerY);
+                currentX += width + spaceWidth;
+            }
+            
+            ctx.restore();
+            ctx.restore();
+            
+            // Reset context
+            ctx.shadowColor = 'transparent';
+            ctx.shadowBlur = 0;
+            ctx.shadowOffsetX = 0;
+            ctx.shadowOffsetY = 0;
+            ctx.filter = 'none';
+            ctx.globalAlpha = 1;
+        }
+
+        function animateTransition(callback) {
+            const transType = transition.value;
+            if (transType === 'none') {
+                callback(1);
+                return;
+            }
+
+            const duration = 300;
+            const startTime = performance.now();
+
+            function animate(currentTime) {
+                const elapsed = currentTime - startTime;
+                transitionProgress = Math.min(1, elapsed / duration);
+                const eased = 1 - Math.pow(1 - transitionProgress, 3);
+                drawFrame(eased);
+
+                if (transitionProgress < 1) {
+                    animationFrame = requestAnimationFrame(animate);
+                } else {
+                    callback(1);
+                }
+            }
+
+            animationFrame = requestAnimationFrame(animate);
+        }
+
+        function playSequence() {
+            if (!isPlaying) return;
+
+            const transType = transition.value;
+            const wordsCount = parseInt(wordsPerFrame.value);
+            const baseSpeed = parseInt(speed.value);
+            const currentSpeed = getVariedSpeed(baseSpeed);
+            
+            // Use the actual speed for slide duration
+            const slideDuration = transType === 'cinematic' ? Math.max(currentSpeed, 2000) : currentSpeed;
+            currentSlideDuration = slideDuration * 0.3; // Animation takes 30% of total time
+
+            slideStartTime = performance.now();
+
+            function animateSlide() {
+                if (!isPlaying) return;
+
+                const elapsed = performance.now() - slideStartTime;
+                const progress = elapsed / slideDuration;
+                
+                // Animate transition for first 30% of time, then hold
+                if (elapsed < currentSlideDuration) {
+                    transitionProgress = elapsed / currentSlideDuration;
+                    const eased = 1 - Math.pow(1 - transitionProgress, 3);
+                    drawFrame(eased);
+                } else {
+                    drawFrame(1); // Hold final state
+                }
+
+                if (progress < 1) {
+                    animationFrame = requestAnimationFrame(animateSlide);
+                } else {
+                    // Slide complete, move to next immediately
+                    currentIndex += wordsCount;
+                    
+                    if (currentIndex >= words.length) {
+                        setTimeout(stop, 100);
+                        return;
+                    }
+
+                    statusText.textContent = `Visar ${Math.min(currentIndex + wordsCount, words.length)}/${words.length} (${currentSpeed}ms)`;
+                    frameCounter.textContent = `Ord: ${currentIndex + 1}-${Math.min(currentIndex + wordsCount, words.length)}`;
+                    updateTimelineActive();
+
+                    // Continue immediately to next slide
+                    slideStartTime = performance.now();
+                    animationFrame = requestAnimationFrame(animateSlide);
+                }
+            }
+
+            animationFrame = requestAnimationFrame(animateSlide);
+        }
+
+        function play() {
+            if (isPlaying) return;
+            
+            words = getWords();
+            const wordsCount = parseInt(wordsPerFrame.value);
+            
+            if (words.length === 0) {
+                statusText.textContent = '⚠ Ingen text att visa!';
+                return;
+            }
+
+            isPlaying = true;
+            currentIndex = 0;
+            transitionProgress = 0;
+            playBtn.disabled = true;
+            recordBtn.disabled = true;
+            stopBtn.disabled = false;
+            statusText.textContent = '▶ Spelar...';
+            
+            const transType = transition.value;
+            const displayCount = transType === 'cinematic' ? Math.min(wordsCount, 3) : Math.min(wordsCount, words.length);
+            frameCounter.textContent = `Ord: 1-${displayCount}`;
+
+            playSequence();
+        }
+
+        function stop() {
+            isPlaying = false;
+            isRecording = false;
+            clearTimeout(playbackTimeout);
+            if (animationFrame) {
+                cancelAnimationFrame(animationFrame);
+            }
+            
+            // Stop media recorder if recording
+            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                mediaRecorder.stop();
+            }
+            
+            playBtn.disabled = false;
+            recordBtn.disabled = false;
+            stopBtn.disabled = true;
+            statusText.textContent = '■ Stoppad';
+            frameCounter.textContent = '';
+            currentIndex = 0;
+            transitionProgress = 0;
+            drawFrame();
+        }
+
+        function recordSequence() {
+            if (!isRecording) return;
+
+            const transType = transition.value;
+            const wordsCount = parseInt(wordsPerFrame.value);
+            const baseSpeed = parseInt(speed.value);
+            const currentSpeed = getVariedSpeed(baseSpeed);
+            
+            // Use the actual speed for slide duration
+            const slideDuration = transType === 'cinematic' ? Math.max(currentSpeed, 2000) : currentSpeed;
+            currentSlideDuration = slideDuration * 0.3; // Animation takes 30% of total time
+
+            slideStartTime = performance.now();
+
+            function animateSlide() {
+                if (!isRecording) return;
+
+                const elapsed = performance.now() - slideStartTime;
+                const progress = elapsed / slideDuration;
+                
+                // Animate transition for first 30% of time, then hold
+                if (elapsed < currentSlideDuration) {
+                    transitionProgress = elapsed / currentSlideDuration;
+                    const eased = 1 - Math.pow(1 - transitionProgress, 3);
+                    drawFrame(eased);
+                } else {
+                    drawFrame(1); // Hold final state
+                }
+
+                if (progress < 1) {
+                    animationFrame = requestAnimationFrame(animateSlide);
+                } else {
+                    // Slide complete, move to next immediately
+                    currentIndex += wordsCount;
+                    
+                    if (currentIndex >= words.length) {
+                        setTimeout(() => {
+                            mediaRecorder.stop();
+                        }, 500);
+                        return;
+                    }
+
+                    statusText.textContent = `Spelar in: ${Math.min(currentIndex + wordsCount, words.length)}/${words.length} (${currentSpeed}ms)`;
+                    frameCounter.textContent = `Ord: ${currentIndex + 1}-${Math.min(currentIndex + wordsCount, words.length)}`;
+                    updateTimelineActive();
+
+                    // Continue immediately to next slide
+                    slideStartTime = performance.now();
+                    animationFrame = requestAnimationFrame(animateSlide);
+                }
+            }
+
+            animationFrame = requestAnimationFrame(animateSlide);
+        }
+
+        function startRecording() {
+            if (isRecording) return;
+
+            const stream = canvas.captureStream(30);
+            recordedChunks = [];
+
+            const mimeTypes = [
+                'video/webm;codecs=vp9',
+                'video/webm;codecs=vp8',
+                'video/webm'
+            ];
+
+            let selectedMimeType = mimeTypes.find(type => MediaRecorder.isTypeSupported(type)) || '';
+
+            if (!selectedMimeType) {
+                statusText.textContent = '⚠ WebM stöds inte i din webbläsare';
+                return;
+            }
+
+            mediaRecorder = new MediaRecorder(stream, {
+                mimeType: selectedMimeType,
+                videoBitsPerSecond: 5000000
+            });
+
+            mediaRecorder.ondataavailable = (event) => {
+                if (event.data.size > 0) {
+                    recordedChunks.push(event.data);
+                }
+            };
+
+            mediaRecorder.onstop = () => {
+                if (recordedChunks.length > 0) {
+                    const blob = new Blob(recordedChunks, { type: 'video/webm' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `trailer_${Date.now()}.webm`;
+                    a.click();
+                    URL.revokeObjectURL(url);
+                }
+                
+                isRecording = false;
+                recordingIndicator.classList.remove('active');
+                playBtn.disabled = false;
+                recordBtn.disabled = false;
+                stopBtn.disabled = true;
+                recordBtn.textContent = '● Spela in';
+                recordBtn.classList.remove('recording');
+                statusText.textContent = '■ Stoppad';
+                frameCounter.textContent = '';
+                
+                currentIndex = 0;
+                transitionProgress = 0;
+                drawFrame();
+            };
+
+            isRecording = true;
+            words = getWords();
+            const wordsCount = parseInt(wordsPerFrame.value);
+            
+            if (words.length === 0) {
+                statusText.textContent = '⚠ Ingen text att visa!';
+                isRecording = false;
+                return;
+            }
+
+            currentIndex = 0;
+            transitionProgress = 0;
+            recordingIndicator.classList.add('active');
+            playBtn.disabled = true;
+            recordBtn.disabled = true;
+            stopBtn.disabled = false;
+            recordBtn.textContent = '■ Stoppar';
+            recordBtn.classList.add('recording');
+            statusText.textContent = '🔴 Spelar in...';
+            
+            const transType = transition.value;
+            const displayCount = transType === 'cinematic' ? Math.min(wordsCount, 3) : Math.min(wordsCount, words.length);
+            frameCounter.textContent = `Ord: 1-${displayCount}`;
+
+            mediaRecorder.start();
+            drawFrame();
+
+            recordSequence();
+        }
+
+        playBtn.addEventListener('click', play);
+        recordBtn.addEventListener('click', startRecording);
+        stopBtn.addEventListener('click', stop);
+        stopBtn.disabled = true;
+
+        // Initial draw
+        drawFrame();
+    </script>
+</body>
+</html>

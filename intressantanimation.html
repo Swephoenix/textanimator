@@ -1,0 +1,208 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080">
+  <defs>
+    <radialGradient id="bgGradient" cx="50%" cy="50%" r="75%">
+      <stop offset="0%" stop-color="#1e293b"/>
+      <stop offset="100%" stop-color="#020617"/>
+    </radialGradient>
+
+    <style>
+      .app {
+        width: 100%;
+        height: 100%;
+        position: relative;
+        font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #f8fafc;
+        overflow: hidden;
+      }
+
+      .slide {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        opacity: 0;
+        visibility: hidden;
+        animation: slideControl var(--dur) var(--d) forwards;
+      }
+
+      .slide.slow {
+        animation: slideControlEnd var(--dur) var(--d) forwards;
+      }
+
+      .text-container {
+        text-align: left;
+        font-weight: 700;
+        line-height: 1.35;
+        font-size: 80px;
+        clip-path: inset(0 100% 0 0);
+        animation: 
+          typing var(--dur) var(--d) forwards,
+          subtleZoom var(--dur) var(--d) linear forwards;
+      }
+
+      .slide.fast .text-container {
+        font-size: 96px;
+      }
+
+      .slide.slow .text-container {
+        font-size: 56px;
+        font-weight: 600;
+        max-width: 1400px;
+        margin: 0 auto;
+      }
+
+      .dim {
+        display: inline;
+        animation: dimText var(--dur) var(--d) forwards;
+      }
+
+      .hl {
+        display: inline;
+        animation: highlightWord var(--dur) var(--d) forwards;
+      }
+
+      /* Master Animations */
+      @keyframes slideControl {
+        0% { opacity: 0; visibility: visible; }
+        5% { opacity: 1; visibility: visible; }
+        90% { opacity: 1; visibility: visible; }
+        95%, 100% { opacity: 0; visibility: hidden; }
+      }
+
+      @keyframes slideControlEnd {
+        0% { opacity: 0; visibility: visible; }
+        5% { opacity: 1; visibility: visible; }
+        100% { opacity: 1; visibility: visible; }
+      }
+
+      @keyframes typing {
+        0% { clip-path: inset(0 100% 0 0); }
+        30% { clip-path: inset(0 0 0 0); }
+        100% { clip-path: inset(0 0 0 0); }
+      }
+
+      @keyframes dimText {
+        0%, 65% { opacity: 1; filter: blur(0px); }
+        75%, 100% { opacity: 0.1; filter: blur(6px); }
+      }
+
+      @keyframes highlightWord {
+        0%, 65% { color: #f8fafc; text-shadow: none; }
+        75%, 100% { 
+          color: #fbbf24; 
+          text-shadow: 0 0 20px rgba(251, 191, 36, 0.5), 0 0 40px rgba(251, 191, 36, 0.2); 
+        }
+      }
+
+      @keyframes subtleZoom {
+        0% { transform: scale(0.95); }
+        100% { transform: scale(1.05); }
+      }
+    </style>
+  </defs>
+
+  <!-- Bakgrund -->
+  <rect width="1920" height="1080" fill="url(#bgGradient)" />
+
+  <!-- HTML Content inuti SVG -->
+  <foreignObject width="1920" height="1080">
+    <div xmlns="http://www.w3.org/1999/xhtml" class="app">
+      
+      <!-- Slide 1 -->
+      <div class="slide" style="--dur: 3.5s; --d: 0s;">
+        <div class="text-container">
+          <span class="dim">Om vad som händer när<br></span><span class="hl">systemen</span><span class="dim"><br>inte fungerar som de ska.</span>
+        </div>
+      </div>
+
+      <!-- Slide 2 -->
+      <div class="slide" style="--dur: 4s; --d: 3.5s;">
+        <div class="text-container">
+          <span class="dim">En bok om dina och andra<br>medborgares fri- och </span><span class="hl">rättigheter</span><span class="dim"><br>i dagens Sverige.</span>
+        </div>
+      </div>
+
+      <!-- Slide 3 -->
+      <div class="slide" style="--dur: 4.5s; --d: 7.5s;">
+        <div class="text-container">
+          <span class="dim">Om brister i domstolar och myndigheter,<br>som du ofta inte märker<br>förrän du själv </span><span class="hl">drabbas</span><span class="dim">.</span>
+        </div>
+      </div>
+
+      <!-- Slide 4 -->
+      <div class="slide fast" style="--dur: 2.5s; --d: 12s;">
+        <div class="text-container">
+          <span class="dim">Vad behöver du faktiskt </span><span class="hl">veta</span><span class="dim"><br>om dina rättigheter?</span>
+        </div>
+      </div>
+
+      <!-- Slide 5 -->
+      <div class="slide fast" style="--dur: 2.5s; --d: 14.5s;">
+        <div class="text-container">
+          <span class="dim">Hur formas din bild<br>av </span><span class="hl">rättsstaten</span><span class="dim"> av media?</span>
+        </div>
+      </div>
+
+      <!-- Slide 6 -->
+      <div class="slide fast" style="--dur: 3s; --d: 17s;">
+        <div class="text-container">
+          <span class="dim">Vad händer i en skatteprocess<br>när </span><span class="hl">rättssäkerheten</span><span class="dim"> sätts på prov?</span>
+        </div>
+      </div>
+
+      <!-- Slide 7 -->
+      <div class="slide fast" style="--dur: 2.5s; --d: 20s;">
+        <div class="text-container">
+          <span class="dim">Hur </span><span class="hl">skyddad</span><span class="dim"> är din egendom<br>i praktiken?</span>
+        </div>
+      </div>
+
+      <!-- Slide 8 -->
+      <div class="slide fast" style="--dur: 2.5s; --d: 22.5s;">
+        <div class="text-container">
+          <span class="dim">Följer staten verkligen </span><span class="hl">grundlagen</span><span class="dim"><br>i varje beslut?</span>
+        </div>
+      </div>
+
+      <!-- Slide 9 -->
+      <div class="slide fast" style="--dur: 2s; --d: 25s;">
+        <div class="text-container">
+          <span class="dim">Behandlas alla </span><span class="hl">lika</span><span class="dim"><br>inför lagen?</span>
+        </div>
+      </div>
+
+      <!-- Slide 10 -->
+      <div class="slide fast" style="--dur: 2.5s; --d: 27s;">
+        <div class="text-container">
+          <span class="dim">Vad händer när åklagare eller domare<br>driver </span><span class="hl">egna</span><span class="dim"> linjer?</span>
+        </div>
+      </div>
+
+      <!-- Slide 11 -->
+      <div class="slide fast" style="--dur: 3s; --d: 29.5s;">
+        <div class="text-container">
+          <span class="dim">Prövas dina bevis och argument<br>– eller lämnas de </span><span class="hl">utanför</span><span class="dim">?</span>
+        </div>
+      </div>
+
+      <!-- Slide 12 -->
+      <div class="slide fast" style="--dur: 3s; --d: 32.5s;">
+        <div class="text-container">
+          <span class="dim">Vad händer i mål där bevisningen är svår,<br>men </span><span class="hl">konsekvenserna</span><span class="dim"> stora?</span>
+        </div>
+      </div>
+
+      <!-- Slide 13 (Avslutning) -->
+      <div class="slide slow" style="--dur: 14s; --d: 35.5s;">
+        <div class="text-container">
+          <span class="dim">Kan svenska medborgare i praktiken ha rättssäkerhet,<br>förutsebarhet och trygghet,<br><br>när en domstol plötsligt kan vägra<br>att återge och pröva deras rättsliga hänvisningar<br>och argument i en dom som påverkar deras </span><span class="hl">rätt</span><span class="dim">?</span>
+        </div>
+      </div>
+
+    </div>
+  </foreignObject>
+</svg>
