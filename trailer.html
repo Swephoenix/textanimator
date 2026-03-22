@@ -677,26 +677,6 @@
             </select>
         </div>
 
-        <div class="control-group">
-            <label>
-                <span class="section-title">Bakgrund</span>
-                Förval
-            </label>
-            <select id="bgPreset">
-                <option value="custom">Anpassad...</option>
-                <option value="black">Svart</option>
-                <option value="midnight">Midnattsblå</option>
-                <option value="crimson">Karmosinröd</option>
-                <option value="ocean">Havsblå</option>
-                <option value="forest">Skogsgrön</option>
-                <option value="royal">Kunglig lila</option>
-                <option value="sunset">Solnedgång</option>
-                <option value="fire">Eld</option>
-                <option value="cyber">Cyberpunk</option>
-                <option value="gold">Guld</option>
-            </select>
-        </div>
-
         <div class="control-group color-input" id="color1Group">
             <label>
                 <span class="section-title">Färg 1</span>
@@ -898,7 +878,6 @@
         const wordCount = document.getElementById('wordCount');
         const timeline = document.getElementById('timeline');
         const bgType = document.getElementById('bgType');
-        const bgPreset = document.getElementById('bgPreset');
         const color1 = document.getElementById('color1');
         const color2 = document.getElementById('color2');
         const bgImage = document.getElementById('bgImage');
@@ -949,29 +928,6 @@
         let animationFrame = null;
         let slideStartTime = 0;
         let currentSlideDuration = 0;
-
-        // Background presets with strong, cinematic colors
-        const bgPresets = {
-            black: { color1: '#000000', color2: '#000000' },
-            midnight: { color1: '#0a0e27', color2: '#1a1f3a' },
-            crimson: { color1: '#4a0a0a', color2: '#2d0202' },
-            ocean: { color1: '#0a1628', color2: '#0d2847' },
-            forest: { color1: '#0a1f0a', color2: '#1a3a1a' },
-            royal: { color1: '#1a0a2e', color2: '#2d0a4a' },
-            sunset: { color1: '#ff6b35', color2: '#f7c59f' },
-            fire: { color1: '#ff4500', color2: '#ff8c00' },
-            cyber: { color1: '#0d0221', color2: '#ff00ff' },
-            gold: { color1: '#b8860b', color2: '#ffd700' }
-        };
-
-        bgPreset.addEventListener('change', () => {
-            const preset = bgPresets[bgPreset.value];
-            if (preset) {
-                color1.value = preset.color1;
-                color2.value = preset.color2;
-                drawFrame();
-            }
-        });
 
         // Show/hide inputs based on background type
         bgType.addEventListener('change', () => {
