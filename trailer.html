@@ -281,6 +281,7 @@
             transition: all 0.3s ease;
             display: flex;
             align-items: center;
+            justify-content: center;
             gap: 8px;
         }
 
@@ -299,11 +300,32 @@
             background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
             color: white;
             box-shadow: 0 4px 15px rgba(17,153,142,0.35);
+            border-radius: 50%;
+            width: 56px;
+            height: 56px;
+            padding: 0;
+            font-size: 24px;
         }
 
         .btn-record:hover:not(:disabled) {
-            transform: translateY(-2px);
+            transform: scale(1.1);
             box-shadow: 0 6px 25px rgba(17,153,142,0.5);
+        }
+
+        .btn-record.recording {
+            background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
+            animation: pulse-record 1.5s infinite;
+        }
+
+        @keyframes pulse-record {
+            0%, 100% { 
+                box-shadow: 0 0 0 0 rgba(235,51,73,0.7);
+                transform: scale(1);
+            }
+            50% { 
+                box-shadow: 0 0 0 15px rgba(235,51,73,0);
+                transform: scale(1.05);
+            }
         }
 
         .btn-stop {
@@ -322,16 +344,6 @@
             cursor: not-allowed;
             opacity: 0.7;
             box-shadow: none;
-        }
-
-        .btn.recording {
-            background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
-            animation: pulse-btn 1.5s infinite;
-        }
-
-        @keyframes pulse-btn {
-            0%, 100% { box-shadow: 0 4px 15px rgba(235,51,73,0.4); }
-            50% { box-shadow: 0 4px 25px rgba(235,51,73,0.7); }
         }
 
         #canvas-container {
@@ -665,14 +677,34 @@
             </select>
         </div>
 
-        <div class="control-group color-input">
+        <div class="control-group">
+            <label>
+                <span class="section-title">Bakgrund</span>
+                Förval
+            </label>
+            <select id="bgPreset">
+                <option value="custom">Anpassad...</option>
+                <option value="black">Svart</option>
+                <option value="midnight">Midnattsblå</option>
+                <option value="crimson">Karmosinröd</option>
+                <option value="ocean">Havsblå</option>
+                <option value="forest">Skogsgrön</option>
+                <option value="royal">Kunglig lila</option>
+                <option value="sunset">Solnedgång</option>
+                <option value="fire">Eld</option>
+                <option value="cyber">Cyberpunk</option>
+                <option value="gold">Guld</option>
+            </select>
+        </div>
+
+        <div class="control-group color-input" id="color1Group">
             <label>
                 <span class="section-title">Färg 1</span>
                 <input type="color" id="color1" value="#000000">
             </label>
         </div>
 
-        <div class="control-group color-input">
+        <div class="control-group color-input" id="color2Group">
             <label>
                 <span class="section-title">Färg 2</span>
                 <input type="color" id="color2" value="#1a1a2e">
@@ -800,7 +832,7 @@
         <div style="display: flex; gap: 12px; width: 100%; margin-top: 10px;">
             <button class="btn btn-primary" id="playBtn" style="flex: 1; padding: 18px 24px; font-size: 16px;">▶ Spela</button>
             <button class="btn btn-stop" id="stopBtn" style="flex: 1; padding: 18px 24px; font-size: 16px;">■ Stoppa</button>
-            <button class="btn btn-record" id="recordBtn" style="flex: 1; padding: 18px 24px; font-size: 16px;">● Spela in</button>
+            <button class="btn btn-record" id="recordBtn" title="Spela in">●</button>
         </div>
     </div>
 
@@ -866,6 +898,7 @@
         const wordCount = document.getElementById('wordCount');
         const timeline = document.getElementById('timeline');
         const bgType = document.getElementById('bgType');
+        const bgPreset = document.getElementById('bgPreset');
         const color1 = document.getElementById('color1');
         const color2 = document.getElementById('color2');
         const bgImage = document.getElementById('bgImage');
@@ -917,12 +950,50 @@
         let slideStartTime = 0;
         let currentSlideDuration = 0;
 
+        // Background presets with strong, cinematic colors
+        const bgPresets = {
+            black: { color1: '#000000', color2: '#000000' },
+            midnight: { color1: '#0a0e27', color2: '#1a1f3a' },
+            crimson: { color1: '#4a0a0a', color2: '#2d0202' },
+            ocean: { color1: '#0a1628', color2: '#0d2847' },
+            forest: { color1: '#0a1f0a', color2: '#1a3a1a' },
+            royal: { color1: '#1a0a2e', color2: '#2d0a4a' },
+            sunset: { color1: '#ff6b35', color2: '#f7c59f' },
+            fire: { color1: '#ff4500', color2: '#ff8c00' },
+            cyber: { color1: '#0d0221', color2: '#ff00ff' },
+            gold: { color1: '#b8860b', color2: '#ffd700' }
+        };
+
+        bgPreset.addEventListener('change', () => {
+            const preset = bgPresets[bgPreset.value];
+            if (preset) {
+                color1.value = preset.color1;
+                color2.value = preset.color2;
+                drawFrame();
+            }
+        });
+
         // Show/hide inputs based on background type
         bgType.addEventListener('change', () => {
-            document.querySelectorAll('.color-input').forEach(el => {
-                el.style.display = bgType.value === 'solid' || bgType.value === 'gradient' ? 'flex' : 'none';
-            });
-            document.querySelector('.image-input').style.display = bgType.value === 'image' ? 'flex' : 'none';
+            const bgTypeValue = bgType.value;
+            const color1Group = document.getElementById('color1Group');
+            const color2Group = document.getElementById('color2Group');
+            
+            if (bgTypeValue === 'solid') {
+                // Only show color1 for solid background
+                color1Group.style.display = 'flex';
+                color2Group.style.display = 'none';
+            } else if (bgTypeValue === 'gradient') {
+                // Show both colors for gradient
+                color1Group.style.display = 'flex';
+                color2Group.style.display = 'flex';
+            } else {
+                // Hide both for image
+                color1Group.style.display = 'none';
+                color2Group.style.display = 'none';
+            }
+            
+            document.querySelector('.image-input').style.display = bgTypeValue === 'image' ? 'flex' : 'none';
             drawFrame();
         });
 
@@ -1852,7 +1923,6 @@
                 playBtn.disabled = false;
                 recordBtn.disabled = false;
                 stopBtn.disabled = true;
-                recordBtn.textContent = '● Spela in';
                 recordBtn.classList.remove('recording');
                 statusText.textContent = '■ Stoppad';
                 frameCounter.textContent = '';
@@ -1878,7 +1948,6 @@
             playBtn.disabled = true;
             recordBtn.disabled = true;
             stopBtn.disabled = false;
-            recordBtn.textContent = '■ Stoppar';
             recordBtn.classList.add('recording');
             statusText.textContent = '🔴 Spelar in...';
             updateTimelineActive();
@@ -1897,6 +1966,9 @@
         recordBtn.addEventListener('click', startRecording);
         stopBtn.addEventListener('click', stop);
         stopBtn.disabled = true;
+
+        // Initialize background type and preset visibility
+        bgType.dispatchEvent(new Event('change'));
 
         // Initial draw
         drawFrame();
