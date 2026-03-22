@@ -12,6 +12,11 @@
             box-sizing: border-box;
         }
 
+        :root {
+            --left-sidebar-width: 400px;
+            --inspector-width: 320px;
+        }
+
         body {
             font-family: 'Montserrat', sans-serif;
             background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 50%, #f5f7fa 100%);
@@ -22,7 +27,7 @@
 
         /* Left Sidebar - Text Input */
         .sidebar {
-            width: 400px;
+            width: var(--left-sidebar-width);
             min-height: 100vh;
             background: linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%);
             padding: 30px;
@@ -118,12 +123,32 @@
             font-weight: 700;
         }
 
+        .input-guide {
+            font-size: 12px;
+            line-height: 1.5;
+            color: #7a7a7a;
+            padding: 12px 14px;
+            background: rgba(255, 255, 255, 0.75);
+            border: 1px solid #e8e8e8;
+            border-radius: 8px;
+        }
+
+        .input-guide code {
+            font-family: 'Roboto Condensed', monospace;
+            font-size: 11px;
+            font-weight: 700;
+            color: #4c63d2;
+            background: rgba(102, 126, 234, 0.08);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
         /* Top Controls Bar */
         .controls-bar {
             position: fixed;
             top: 0;
-            left: 400px;
-            right: 0;
+            left: var(--left-sidebar-width);
+            right: var(--inspector-width);
             padding: 20px 30px;
             background: linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%);
             display: flex;
@@ -312,8 +337,8 @@
         #canvas-container {
             position: fixed;
             top: 100px;
-            left: 400px;
-            right: 0;
+            left: var(--left-sidebar-width);
+            right: var(--inspector-width);
             bottom: 50px;
             display: flex;
             justify-content: center;
@@ -332,8 +357,8 @@
         .status-bar {
             position: fixed;
             bottom: 0;
-            left: 400px;
-            right: 0;
+            left: var(--left-sidebar-width);
+            right: var(--inspector-width);
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -419,8 +444,8 @@
         .timeline-container {
             position: fixed;
             bottom: 50px;
-            left: 400px;
-            right: 0;
+            left: var(--left-sidebar-width);
+            right: var(--inspector-width);
             height: 100px;
             background: #fff;
             border-top: 1px solid #e8e8e8;
@@ -512,6 +537,79 @@
         .timeline::-webkit-scrollbar-thumb:hover {
             background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
         }
+
+        .slide-inspector {
+            position: fixed;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            width: var(--inspector-width);
+            padding: 28px 24px;
+            background: linear-gradient(180deg, #ffffff 0%, #f6f8fb 100%);
+            border-left: 1px solid #e4e8ef;
+            box-shadow: -5px 0 20px rgba(0,0,0,0.06);
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            z-index: 90;
+        }
+
+        .slide-inspector h3 {
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: #394150;
+        }
+
+        .inspector-card {
+            background: #fff;
+            border: 1px solid #e5e9f0;
+            border-radius: 14px;
+            padding: 16px;
+            box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
+        }
+
+        .inspector-label {
+            display: block;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            color: #8a93a3;
+            margin-bottom: 10px;
+        }
+
+        .inspector-preview {
+            min-height: 110px;
+            font-size: 16px;
+            line-height: 1.55;
+            color: #334155;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .slide-inspector input[type="number"] {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid #d4dbe6;
+            border-radius: 10px;
+            font-size: 15px;
+            background: #fff;
+            color: #1f2937;
+        }
+
+        .slide-inspector input[type="number"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102,126,234,0.12);
+        }
+
+        .inspector-meta {
+            font-size: 12px;
+            line-height: 1.5;
+            color: #6b7280;
+        }
     </style>
 </head>
 <body>
@@ -530,6 +628,7 @@
             <div class="word-count">
                 Ord: <span id="wordCount">0</span>
             </div>
+            <p class="input-guide">Skriv <code>///</code> för att flytta nästa ord till nästa slide. Skriv <code>[[ord]]</code> för att highlighta ordet i cinematic-läget.</p>
         </div>
     </aside>
 
@@ -580,6 +679,14 @@
 
         <div class="control-group">
             <label>
+                <span class="section-title">Utseende</span>
+                Skugga (%)
+            </label>
+            <input type="number" id="textShadowStrength" min="0" max="100" value="80" step="1">
+        </div>
+
+        <div class="control-group">
+            <label>
                 <span class="section-title">Typsnitt</span>
                 Stil
             </label>
@@ -613,10 +720,9 @@
         <div class="control-group">
             <label>
                 <span class="section-title">Timing</span>
-                Hastighet
+                Hastighet (ms)
             </label>
-            <input type="range" id="speed" min="100" max="3000" value="1200">
-            <span class="value-display" id="speedValue">1200ms</span>
+            <input type="number" id="speed" min="100" max="10000" value="1200" step="1">
         </div>
 
         <div class="control-group">
@@ -630,7 +736,7 @@
                 <option value="medium">Medium (±40%)</option>
                 <option value="high">Hög (±60%)</option>
                 <option value="extreme">Extrem (±80%)</option>
-                <option value="random">Slump (500-2500ms)</option>
+                <option value="random">Slump (500-1000ms)</option>
             </select>
         </div>
 
@@ -639,8 +745,7 @@
                 <span class="section-title">Visning</span>
                 Ord per gång
             </label>
-            <input type="range" id="wordsPerFrame" min="1" max="5" value="2">
-            <span class="value-display" id="wordsPerFrameValue">2</span>
+            <input type="number" id="wordsPerFrame" min="1" max="20" value="2" step="1">
         </div>
 
         <div class="control-group cinematic-options" style="display: none;">
@@ -649,6 +754,14 @@
                 Markera viktiga ord
             </label>
             <input type="text" id="highlightWords" placeholder="t.ex. system,rättigheter,frihet" style="width: 200px;">
+        </div>
+
+        <div class="control-group cinematic-options" style="display: none;">
+            <label>
+                <span class="section-title">Cinematic</span>
+                Standardtid (ms)
+            </label>
+            <input type="number" id="cinematicDefaultDuration" min="100" max="15000" value="3200" step="1">
         </div>
 
         <button class="btn btn-primary" id="playBtn">▶ Spela</button>
@@ -664,6 +777,24 @@
     <div class="timeline-container">
         <div class="timeline" id="timeline"></div>
     </div>
+
+    <aside class="slide-inspector">
+        <h3>Slide Inspector</h3>
+        <div class="inspector-card">
+            <span class="inspector-label" id="slideInspectorTitle">Slide 1</span>
+            <div class="inspector-preview" id="slideInspectorPreview"></div>
+        </div>
+        <div class="inspector-card">
+            <label class="inspector-label" for="slideDurationInput">Varaktighet</label>
+            <input type="number" id="slideDurationInput" min="100" max="10000" step="1">
+            <p class="inspector-meta" id="slideDurationMeta"></p>
+        </div>
+        <div class="inspector-card" id="slideCinematicInspectorCard">
+            <label class="inspector-label" for="slideCinematicDurationInput">Cinematic Varaktighet</label>
+            <input type="number" id="slideCinematicDurationInput" min="100" max="15000" step="1">
+            <p class="inspector-meta" id="slideCinematicDurationMeta"></p>
+        </div>
+    </aside>
 
     <div class="status-bar">
         <div class="status-text">
@@ -689,24 +820,34 @@
         const bgImage = document.getElementById('bgImage');
         const fileName = document.getElementById('fileName');
         const textColor = document.getElementById('textColor');
+        const textShadowStrength = document.getElementById('textShadowStrength');
         const fontFamily = document.getElementById('fontFamily');
         const transition = document.getElementById('transition');
         const speed = document.getElementById('speed');
-        const speedValue = document.getElementById('speedValue');
         const speedVariation = document.getElementById('speedVariation');
         const wordsPerFrame = document.getElementById('wordsPerFrame');
-        const wordsPerFrameValue = document.getElementById('wordsPerFrameValue');
         const highlightWordsInput = document.getElementById('highlightWords');
-        const cinematicOptions = document.querySelector('.cinematic-options');
+        const cinematicDefaultDuration = document.getElementById('cinematicDefaultDuration');
+        const cinematicOptions = document.querySelectorAll('.cinematic-options');
         const playBtn = document.getElementById('playBtn');
         const recordBtn = document.getElementById('recordBtn');
         const stopBtn = document.getElementById('stopBtn');
         const statusText = document.getElementById('statusText');
         const recordingIndicator = document.getElementById('recordingIndicator');
         const frameCounter = document.getElementById('frameCounter');
+        const slideInspectorTitle = document.getElementById('slideInspectorTitle');
+        const slideInspectorPreview = document.getElementById('slideInspectorPreview');
+        const slideDurationInput = document.getElementById('slideDurationInput');
+        const slideDurationMeta = document.getElementById('slideDurationMeta');
+        const slideCinematicInspectorCard = document.getElementById('slideCinematicInspectorCard');
+        const slideCinematicDurationInput = document.getElementById('slideCinematicDurationInput');
+        const slideCinematicDurationMeta = document.getElementById('slideCinematicDurationMeta');
 
-        let words = [];
-        let currentIndex = 0;
+        let slides = [];
+        let slideWordRanges = [];
+        let slideDurations = [];
+        let slideCinematicDurations = [];
+        let currentSlideIndex = 0;
         let isPlaying = false;
         let isRecording = false;
         let playbackTimeout = null;
@@ -729,7 +870,10 @@
 
         // Show/hide cinematic options
         transition.addEventListener('change', () => {
-            cinematicOptions.style.display = transition.value === 'cinematic' ? 'flex' : 'none';
+            cinematicOptions.forEach(option => {
+                option.style.display = transition.value === 'cinematic' ? 'flex' : 'none';
+            });
+            updateInspector();
         });
 
         bgImage.addEventListener('change', (e) => {
@@ -750,7 +894,48 @@
         });
 
         speed.addEventListener('input', () => {
-            speedValue.textContent = speed.value + 'ms';
+            if (speed.value === '') {
+                return;
+            }
+
+            const parsedValue = parseInt(speed.value, 10);
+            if (Number.isNaN(parsedValue)) {
+                return;
+            }
+
+            speed.value = Math.min(10000, parsedValue);
+            updateInspector();
+        });
+
+        speed.addEventListener('change', () => {
+            const parsedValue = parseInt(speed.value, 10);
+            const safeValue = Number.isNaN(parsedValue) ? 1200 : Math.min(10000, Math.max(100, parsedValue));
+            speed.value = safeValue;
+            updateInspector();
+        });
+
+        speed.addEventListener('keydown', (event) => {
+            if (event.key !== 'ArrowUp' && event.key !== 'ArrowDown') {
+                return;
+            }
+
+            event.preventDefault();
+            const currentValue = parseInt(speed.value, 10);
+            const baseValue = Number.isNaN(currentValue) ? 1200 : currentValue;
+            const delta = event.key === 'ArrowUp' ? 100 : -100;
+            const nextValue = Math.min(10000, Math.max(100, baseValue + delta));
+            speed.value = nextValue;
+            updateInspector();
+        });
+
+        textShadowStrength.addEventListener('input', () => {
+            const parsedValue = parseInt(textShadowStrength.value, 10);
+            if (Number.isNaN(parsedValue)) {
+                return;
+            }
+
+            textShadowStrength.value = Math.min(100, Math.max(0, parsedValue));
+            drawFrame();
         });
 
         function getVariedSpeed(baseSpeed) {
@@ -775,7 +960,7 @@
                     maxMultiplier = 1.8;
                     break;
                 case 'random':
-                    return Math.random() * 2000 + 500; // 500-2500ms
+                    return Math.random() * 500 + 500; // 500-1000ms
                 default: // none
                     return baseSpeed;
             }
@@ -785,38 +970,155 @@
         }
 
         wordsPerFrame.addEventListener('input', () => {
-            wordsPerFrameValue.textContent = wordsPerFrame.value;
+            const parsedValue = parseInt(wordsPerFrame.value, 10);
+            const safeValue = Number.isNaN(parsedValue) ? 1 : Math.min(20, Math.max(1, parsedValue));
+            wordsPerFrame.value = safeValue;
             updateWordCount();
+            drawFrame();
         });
 
-        function getWords() {
+        [color1, color2, textColor, fontFamily, transition, highlightWordsInput].forEach(control => {
+            control.addEventListener('input', () => {
+                drawFrame();
+            });
+
+            control.addEventListener('change', () => {
+                drawFrame();
+            });
+        });
+
+        function getSlides() {
             const text = textInput.value.trim();
-            return text.split(/\s+/).filter(w => w.length > 0);
+            const wordsCount = parseInt(wordsPerFrame.value, 10);
+            const nextSlides = [];
+            const nextRanges = [];
+            const segments = text
+                ? text.split(/\s*\/\/\/\s*/).map(part => part.split(/\s+/).filter(w => w.length > 0))
+                : [];
+            let totalWords = 0;
+            let wordStart = 1;
+
+            function pushSlide(words) {
+                if (words.length === 0) {
+                    return;
+                }
+
+                totalWords += words.length;
+                nextSlides.push(words);
+                nextRanges.push({
+                    start: wordStart,
+                    end: totalWords
+                });
+                wordStart = totalWords + 1;
+            }
+
+            segments.forEach(segmentWords => {
+                for (let i = 0; i < segmentWords.length; i += wordsCount) {
+                    pushSlide(segmentWords.slice(i, i + wordsCount));
+                }
+            });
+
+            return {
+                slides: nextSlides,
+                ranges: nextRanges,
+                totalWords
+            };
+        }
+
+        function getGlobalSpeedValue() {
+            return Math.min(10000, Math.max(100, parseInt(speed.value, 10) || 1200));
+        }
+
+        function getDefaultCinematicSpeedValue() {
+            return Math.min(15000, Math.max(100, parseInt(cinematicDefaultDuration.value, 10) || 3200));
+        }
+
+        function getSlideSpeedValue(index) {
+            const customValue = slideDurations[index];
+            if (Number.isFinite(customValue)) {
+                return Math.min(10000, Math.max(100, customValue));
+            }
+
+            return getGlobalSpeedValue();
+        }
+
+        function getCinematicSlideSpeedValue(index) {
+            const customValue = slideCinematicDurations[index];
+            if (Number.isFinite(customValue)) {
+                return Math.min(15000, Math.max(100, customValue));
+            }
+
+            return getDefaultCinematicSpeedValue();
+        }
+
+        function syncSlideDurations() {
+            slideDurations = slides.map((_, index) => Number.isFinite(slideDurations[index]) ? slideDurations[index] : null);
+            slideCinematicDurations = slides.map((_, index) => Number.isFinite(slideCinematicDurations[index]) ? slideCinematicDurations[index] : null);
+            if (slides.length === 0) {
+                currentSlideIndex = 0;
+            } else if (currentSlideIndex >= slides.length) {
+                currentSlideIndex = slides.length - 1;
+            }
+        }
+
+        function updateInspector() {
+            const isCinematic = transition.value === 'cinematic';
+            slideCinematicInspectorCard.style.display = isCinematic ? 'block' : 'none';
+
+            if (slides.length === 0) {
+                slideInspectorTitle.textContent = 'Ingen slide';
+                slideInspectorPreview.textContent = 'Skriv text eller bygg slides för att se detaljer här.';
+                slideDurationInput.value = getGlobalSpeedValue();
+                slideDurationInput.disabled = true;
+                slideDurationMeta.textContent = 'Global timing används när inga slides finns.';
+                slideCinematicDurationInput.value = getDefaultCinematicSpeedValue();
+                slideCinematicDurationInput.disabled = true;
+                slideCinematicDurationMeta.textContent = 'Cinematic-standard visas när cinematic är vald.';
+                return;
+            }
+
+            const slideText = slides[currentSlideIndex].map(word => parseDisplayWord(word).text).join(' ');
+            const customValue = slideDurations[currentSlideIndex];
+            const effectiveValue = getSlideSpeedValue(currentSlideIndex);
+            const customCinematicValue = slideCinematicDurations[currentSlideIndex];
+            const effectiveCinematicValue = getCinematicSlideSpeedValue(currentSlideIndex);
+
+            slideInspectorTitle.textContent = `Slide ${currentSlideIndex + 1}`;
+            slideInspectorPreview.textContent = slideText || 'Tom slide';
+            slideDurationInput.value = effectiveValue;
+            slideDurationInput.disabled = isPlaying || isRecording;
+            slideDurationMeta.textContent = Number.isFinite(customValue)
+                ? `Specifik varaktighet aktiv. Global timing är ${getGlobalSpeedValue()} ms.`
+                : `Använder global timing på ${getGlobalSpeedValue()} ms tills du ändrar denna slide.`;
+            slideCinematicDurationInput.value = effectiveCinematicValue;
+            slideCinematicDurationInput.disabled = !isCinematic || isPlaying || isRecording;
+            slideCinematicDurationMeta.textContent = Number.isFinite(customCinematicValue)
+                ? `Specifik cinematic-varaktighet aktiv. Standard är ${getDefaultCinematicSpeedValue()} ms.`
+                : `Använder cinematic-standard på ${getDefaultCinematicSpeedValue()} ms tills du ändrar denna slide.`;
         }
 
         function updateWordCount() {
-            const words = getWords();
-            wordCount.textContent = words.length;
-            buildTimeline(words);
+            const slideData = getSlides();
+            slides = slideData.slides;
+            slideWordRanges = slideData.ranges;
+            wordCount.textContent = slideData.totalWords;
+            syncSlideDurations();
+            buildTimeline(slides);
+            updateTimelineActive();
+            updateInspector();
         }
 
-        function buildTimeline(words) {
-            const wordsCount = parseInt(wordsPerFrame.value);
+        function buildTimeline(slides) {
             timeline.innerHTML = '';
             
-            for (let i = 0; i < words.length; i += wordsCount) {
-                const frameWords = [];
-                for (let j = 0; j < wordsCount && i + j < words.length; j++) {
-                    frameWords.push(words[i + j]);
-                }
-                
+            slides.forEach((frameWords, index) => {
                 const slide = document.createElement('div');
                 slide.className = 'timeline-slide';
-                slide.dataset.index = i;
+                slide.dataset.index = index;
                 
                 const slideNumber = document.createElement('span');
                 slideNumber.className = 'slide-number';
-                slideNumber.textContent = Math.floor(i / wordsCount) + 1;
+                slideNumber.textContent = index + 1;
                 
                 const slideText = document.createElement('span');
                 slideText.className = 'slide-text';
@@ -827,21 +1129,22 @@
                 
                 slide.addEventListener('click', () => {
                     if (!isPlaying && !isRecording) {
-                        currentIndex = i;
+                        currentSlideIndex = index;
                         drawFrame();
                         updateTimelineActive();
+                        updateInspector();
                     }
                 });
                 
                 timeline.appendChild(slide);
-            }
+            });
         }
 
         function updateTimelineActive() {
             const slides = document.querySelectorAll('.timeline-slide');
             slides.forEach(slide => {
                 const index = parseInt(slide.dataset.index);
-                if (index === currentIndex) {
+                if (index === currentSlideIndex) {
                     slide.classList.add('active');
                     slide.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
                 } else {
@@ -849,6 +1152,56 @@
                 }
             });
         }
+
+        slideDurationInput.addEventListener('input', () => {
+            if (slides.length === 0 || slideDurationInput.value === '') {
+                return;
+            }
+
+            const parsedValue = parseInt(slideDurationInput.value, 10);
+            if (Number.isNaN(parsedValue)) {
+                return;
+            }
+
+            slideDurations[currentSlideIndex] = Math.min(10000, Math.max(100, parsedValue));
+            slideDurationInput.value = slideDurations[currentSlideIndex];
+            updateInspector();
+        });
+
+        slideCinematicDurationInput.addEventListener('input', () => {
+            if (slides.length === 0 || slideCinematicDurationInput.value === '') {
+                return;
+            }
+
+            const parsedValue = parseInt(slideCinematicDurationInput.value, 10);
+            if (Number.isNaN(parsedValue)) {
+                return;
+            }
+
+            slideCinematicDurations[currentSlideIndex] = Math.min(15000, Math.max(100, parsedValue));
+            slideCinematicDurationInput.value = slideCinematicDurations[currentSlideIndex];
+            updateInspector();
+        });
+
+        cinematicDefaultDuration.addEventListener('input', () => {
+            if (cinematicDefaultDuration.value === '') {
+                return;
+            }
+
+            const parsedValue = parseInt(cinematicDefaultDuration.value, 10);
+            if (Number.isNaN(parsedValue)) {
+                return;
+            }
+
+            cinematicDefaultDuration.value = Math.min(15000, parsedValue);
+            updateInspector();
+        });
+
+        cinematicDefaultDuration.addEventListener('change', () => {
+            const parsedValue = parseInt(cinematicDefaultDuration.value, 10);
+            cinematicDefaultDuration.value = Number.isNaN(parsedValue) ? 3200 : Math.min(15000, Math.max(100, parsedValue));
+            updateInspector();
+        });
 
         textInput.addEventListener('input', updateWordCount);
         updateWordCount();
@@ -926,44 +1279,79 @@
             ctx.restore();
         }
 
+        function getFittedFontSize(text, baseSize, weight = 'bold') {
+            const maxWidth = canvas.width * 0.82;
+            const maxHeight = canvas.height * 0.3;
+            let fontSize = baseSize;
+
+            while (fontSize > 36) {
+                ctx.font = `${weight} ${fontSize}px '${fontFamily.value}', sans-serif`;
+                const metrics = ctx.measureText(text);
+                const textWidth = metrics.width;
+                const textHeight = (metrics.actualBoundingBoxAscent || fontSize * 0.8) + (metrics.actualBoundingBoxDescent || fontSize * 0.2);
+
+                if (textWidth <= maxWidth && textHeight <= maxHeight) {
+                    break;
+                }
+
+                fontSize -= 4;
+            }
+
+            return fontSize;
+        }
+
+        function parseDisplayWord(rawWord) {
+            const match = rawWord.match(/^\[\[(.+?)\]\]([.,!?;:]*)$/);
+            if (!match) {
+                return {
+                    text: rawWord,
+                    highlighted: false
+                };
+            }
+
+            return {
+                text: `${match[1]}${match[2]}`,
+                highlighted: true
+            };
+        }
+
         function drawFrame(transitionProg = 1) {
             drawBackground();
 
-            if (words.length === 0) {
-                words = getWords();
+            if (slides.length === 0) {
+                updateWordCount();
             }
 
-            if (currentIndex >= words.length) {
+            if (currentSlideIndex >= slides.length) {
                 return;
             }
 
-            const wordsCount = parseInt(wordsPerFrame.value);
-            const frameWords = [];
-            for (let i = 0; i < wordsCount && currentIndex + i < words.length; i++) {
-                frameWords.push(words[currentIndex + i]);
-            }
-            const text = frameWords.join(' ');
+            const frameWords = slides[currentSlideIndex];
+            const parsedWords = frameWords.map(parseDisplayWord);
+            const text = parsedWords.map(word => word.text).join(' ');
 
             // Cinematic mode - render with effects
             if (transition.value === 'cinematic') {
-                drawCinematicFrame(text, transitionProg);
+                drawCinematicFrame(parsedWords, transitionProg);
                 return;
             }
 
             // Text styling
+            const fontSize = getFittedFontSize(text, 120);
             ctx.fillStyle = textColor.value;
-            ctx.font = `bold 120px '${fontFamily.value}', sans-serif`;
+            ctx.font = `bold ${fontSize}px '${fontFamily.value}', sans-serif`;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
 
-            // Add text shadow for cinematic effect
-            ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
-            ctx.shadowBlur = 30;
-            ctx.shadowOffsetX = 5;
-            ctx.shadowOffsetY = 5;
+            // Add configurable text shadow
+            const shadowStrength = Math.min(100, Math.max(0, parseInt(textShadowStrength.value, 10) || 0));
+            ctx.shadowColor = `rgba(0, 0, 0, ${shadowStrength / 100})`;
+            ctx.shadowBlur = shadowStrength > 0 ? 30 : 0;
+            ctx.shadowOffsetX = shadowStrength > 0 ? 5 : 0;
+            ctx.shadowOffsetY = shadowStrength > 0 ? 5 : 0;
 
             // Draw text centered with transition
-            applyTransitionEffect(transitionProg, text, canvas.width / 2, canvas.height / 2, 120);
+            applyTransitionEffect(transitionProg, text, canvas.width / 2, canvas.height / 2, fontSize);
 
             // Reset shadow
             ctx.shadowColor = 'transparent';
@@ -992,10 +1380,11 @@
             ctx.fillRect(0, 0, canvas.width, canvas.height);
         }
 
-        function drawCinematicFrame(text, progress) {
+        function drawCinematicFrame(parsedWords, progress) {
             const centerX = canvas.width / 2;
             const centerY = canvas.height / 2;
-            const fontSize = 80;
+            const text = parsedWords.map(word => word.text).join(' ');
+            const fontSize = getFittedFontSize(text, 80, '700');
             
             ctx.save();
             
@@ -1007,6 +1396,7 @@
 
             // Set font once
             ctx.font = `700 ${fontSize}px '${fontFamily.value}', sans-serif`;
+            ctx.textAlign = 'left';
             ctx.textBaseline = 'middle';
             
             // Measure full text once
@@ -1017,18 +1407,18 @@
             
             ctx.save();
             ctx.beginPath();
-            ctx.rect(centerX - fullTextWidth / 2, centerY - fontSize, revealWidth + fullTextWidth / 2, fontSize * 2.5);
+            ctx.rect(centerX - fullTextWidth / 2, centerY - fontSize, revealWidth, fontSize * 2.5);
             ctx.clip();
 
             // Split text into words and check for highlights
             const highlightList = highlightWordsInput.value.toLowerCase().split(',').map(w => w.trim()).filter(w => w);
-            const textParts = text.split(' ');
             
             // Pre-calculate word widths
             const spaceWidth = ctx.measureText(' ').width;
-            const wordWidths = textParts.map(word => ({
-                word: word,
-                width: ctx.measureText(word).width
+            const wordWidths = parsedWords.map(({ text, highlighted }) => ({
+                word: text,
+                highlighted,
+                width: ctx.measureText(text).width
             }));
             
             const totalWidth = wordWidths.reduce((sum, w) => sum + w.width, 0) + (wordWidths.length - 1) * spaceWidth;
@@ -1038,8 +1428,8 @@
             const isHighlighted = progress > 0.65;
             
             for (let i = 0; i < wordWidths.length; i++) {
-                const { word, width } = wordWidths[i];
-                const shouldHighlight = highlightList.some(hw => word.toLowerCase().includes(hw));
+                const { word, width, highlighted } = wordWidths[i];
+                const shouldHighlight = highlighted || highlightList.some(hw => word.toLowerCase().includes(hw));
                 
                 if (shouldHighlight && isHighlighted) {
                     // Highlighted word - golden with glow
@@ -1062,7 +1452,7 @@
                     ctx.shadowBlur = 0;
                 }
                 
-                ctx.fillText(word, currentX + width / 2, centerY);
+                ctx.fillText(word, currentX, centerY);
                 currentX += width + spaceWidth;
             }
             
@@ -1108,13 +1498,14 @@
             if (!isPlaying) return;
 
             const transType = transition.value;
-            const wordsCount = parseInt(wordsPerFrame.value);
-            const baseSpeed = parseInt(speed.value);
-            const currentSpeed = getVariedSpeed(baseSpeed);
+            const slideBaseSpeed = getSlideSpeedValue(currentSlideIndex);
+            const hasCustomDuration = Number.isFinite(slideDurations[currentSlideIndex]);
+            const currentSpeed = transType === 'cinematic'
+                ? getCinematicSlideSpeedValue(currentSlideIndex)
+                : (hasCustomDuration ? slideBaseSpeed : getVariedSpeed(slideBaseSpeed));
             
-            // Use the actual speed for slide duration
-            const slideDuration = transType === 'cinematic' ? Math.max(currentSpeed, 2000) : currentSpeed;
-            currentSlideDuration = slideDuration * 0.3; // Animation takes 30% of total time
+            const slideDuration = currentSpeed;
+            currentSlideDuration = slideDuration * (transType === 'cinematic' ? 0.55 : 0.3);
 
             slideStartTime = performance.now();
 
@@ -1124,7 +1515,7 @@
                 const elapsed = performance.now() - slideStartTime;
                 const progress = elapsed / slideDuration;
                 
-                // Animate transition for first 30% of time, then hold
+                // Animate transition for the configured intro window, then hold
                 if (elapsed < currentSlideDuration) {
                     transitionProgress = elapsed / currentSlideDuration;
                     const eased = 1 - Math.pow(1 - transitionProgress, 3);
@@ -1137,16 +1528,18 @@
                     animationFrame = requestAnimationFrame(animateSlide);
                 } else {
                     // Slide complete, move to next immediately
-                    currentIndex += wordsCount;
+                    currentSlideIndex += 1;
                     
-                    if (currentIndex >= words.length) {
+                    if (currentSlideIndex >= slides.length) {
                         setTimeout(stop, 100);
                         return;
                     }
 
-                    statusText.textContent = `Visar ${Math.min(currentIndex + wordsCount, words.length)}/${words.length} (${currentSpeed}ms)`;
-                    frameCounter.textContent = `Ord: ${currentIndex + 1}-${Math.min(currentIndex + wordsCount, words.length)}`;
+                    const range = slideWordRanges[currentSlideIndex];
+                    statusText.textContent = `Visar slide ${currentSlideIndex + 1}/${slides.length} (${transition.value === 'cinematic' ? getCinematicSlideSpeedValue(currentSlideIndex) : getSlideSpeedValue(currentSlideIndex)}ms)`;
+                    frameCounter.textContent = range ? `Ord: ${range.start}-${range.end}` : '';
                     updateTimelineActive();
+                    updateInspector();
 
                     // Continue immediately to next slide
                     slideStartTime = performance.now();
@@ -1160,25 +1553,25 @@
         function play() {
             if (isPlaying) return;
             
-            words = getWords();
-            const wordsCount = parseInt(wordsPerFrame.value);
+            updateWordCount();
             
-            if (words.length === 0) {
+            if (slides.length === 0) {
                 statusText.textContent = '⚠ Ingen text att visa!';
                 return;
             }
 
             isPlaying = true;
-            currentIndex = 0;
+            currentSlideIndex = 0;
             transitionProgress = 0;
             playBtn.disabled = true;
             recordBtn.disabled = true;
             stopBtn.disabled = false;
             statusText.textContent = '▶ Spelar...';
+            updateTimelineActive();
+            updateInspector();
             
-            const transType = transition.value;
-            const displayCount = transType === 'cinematic' ? Math.min(wordsCount, 3) : Math.min(wordsCount, words.length);
-            frameCounter.textContent = `Ord: 1-${displayCount}`;
+            const firstRange = slideWordRanges[0];
+            frameCounter.textContent = firstRange ? `Ord: ${firstRange.start}-${firstRange.end}` : '';
 
             playSequence();
         }
@@ -1201,8 +1594,10 @@
             stopBtn.disabled = true;
             statusText.textContent = '■ Stoppad';
             frameCounter.textContent = '';
-            currentIndex = 0;
+            currentSlideIndex = 0;
             transitionProgress = 0;
+            updateTimelineActive();
+            updateInspector();
             drawFrame();
         }
 
@@ -1210,13 +1605,14 @@
             if (!isRecording) return;
 
             const transType = transition.value;
-            const wordsCount = parseInt(wordsPerFrame.value);
-            const baseSpeed = parseInt(speed.value);
-            const currentSpeed = getVariedSpeed(baseSpeed);
+            const slideBaseSpeed = getSlideSpeedValue(currentSlideIndex);
+            const hasCustomDuration = Number.isFinite(slideDurations[currentSlideIndex]);
+            const currentSpeed = transType === 'cinematic'
+                ? getCinematicSlideSpeedValue(currentSlideIndex)
+                : (hasCustomDuration ? slideBaseSpeed : getVariedSpeed(slideBaseSpeed));
             
-            // Use the actual speed for slide duration
-            const slideDuration = transType === 'cinematic' ? Math.max(currentSpeed, 2000) : currentSpeed;
-            currentSlideDuration = slideDuration * 0.3; // Animation takes 30% of total time
+            const slideDuration = currentSpeed;
+            currentSlideDuration = slideDuration * (transType === 'cinematic' ? 0.55 : 0.3);
 
             slideStartTime = performance.now();
 
@@ -1226,7 +1622,7 @@
                 const elapsed = performance.now() - slideStartTime;
                 const progress = elapsed / slideDuration;
                 
-                // Animate transition for first 30% of time, then hold
+                // Animate transition for the configured intro window, then hold
                 if (elapsed < currentSlideDuration) {
                     transitionProgress = elapsed / currentSlideDuration;
                     const eased = 1 - Math.pow(1 - transitionProgress, 3);
@@ -1239,18 +1635,20 @@
                     animationFrame = requestAnimationFrame(animateSlide);
                 } else {
                     // Slide complete, move to next immediately
-                    currentIndex += wordsCount;
+                    currentSlideIndex += 1;
                     
-                    if (currentIndex >= words.length) {
+                    if (currentSlideIndex >= slides.length) {
                         setTimeout(() => {
                             mediaRecorder.stop();
                         }, 500);
                         return;
                     }
 
-                    statusText.textContent = `Spelar in: ${Math.min(currentIndex + wordsCount, words.length)}/${words.length} (${currentSpeed}ms)`;
-                    frameCounter.textContent = `Ord: ${currentIndex + 1}-${Math.min(currentIndex + wordsCount, words.length)}`;
+                    const range = slideWordRanges[currentSlideIndex];
+                    statusText.textContent = `Spelar in slide ${currentSlideIndex + 1}/${slides.length} (${transition.value === 'cinematic' ? getCinematicSlideSpeedValue(currentSlideIndex) : getSlideSpeedValue(currentSlideIndex)}ms)`;
+                    frameCounter.textContent = range ? `Ord: ${range.start}-${range.end}` : '';
                     updateTimelineActive();
+                    updateInspector();
 
                     // Continue immediately to next slide
                     slideStartTime = performance.now();
@@ -1312,22 +1710,23 @@
                 statusText.textContent = '■ Stoppad';
                 frameCounter.textContent = '';
                 
-                currentIndex = 0;
+                currentSlideIndex = 0;
                 transitionProgress = 0;
+                updateTimelineActive();
+                updateInspector();
                 drawFrame();
             };
 
             isRecording = true;
-            words = getWords();
-            const wordsCount = parseInt(wordsPerFrame.value);
+            updateWordCount();
             
-            if (words.length === 0) {
+            if (slides.length === 0) {
                 statusText.textContent = '⚠ Ingen text att visa!';
                 isRecording = false;
                 return;
             }
 
-            currentIndex = 0;
+            currentSlideIndex = 0;
             transitionProgress = 0;
             recordingIndicator.classList.add('active');
             playBtn.disabled = true;
@@ -1336,10 +1735,11 @@
             recordBtn.textContent = '■ Stoppar';
             recordBtn.classList.add('recording');
             statusText.textContent = '🔴 Spelar in...';
+            updateTimelineActive();
+            updateInspector();
             
-            const transType = transition.value;
-            const displayCount = transType === 'cinematic' ? Math.min(wordsCount, 3) : Math.min(wordsCount, words.length);
-            frameCounter.textContent = `Ord: 1-${displayCount}`;
+            const firstRange = slideWordRanges[0];
+            frameCounter.textContent = firstRange ? `Ord: ${firstRange.start}-${firstRange.end}` : '';
 
             mediaRecorder.start();
             drawFrame();
