@@ -605,6 +605,25 @@
             box-shadow: 0 0 0 4px rgba(102,126,234,0.12);
         }
 
+        .slide-inspector textarea {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid #d4dbe6;
+            border-radius: 10px;
+            font-size: 14px;
+            background: #fff;
+            color: #1f2937;
+            font-family: inherit;
+            resize: vertical;
+            line-height: 1.5;
+        }
+
+        .slide-inspector textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102,126,234,0.12);
+        }
+
         .inspector-meta {
             font-size: 12px;
             line-height: 1.5;
@@ -617,12 +636,12 @@
     <aside class="sidebar">
         <div class="sidebar-header">
             <h2>🎬 Trailer</h2>
-            <p>Skriv din text här</p>
+            <p>Skiss – skriv din text här</p>
         </div>
-        
+
         <div class="text-input-container">
             <label>
-                <span>Textinnehåll</span>
+                <span>Textinnehåll (Skissläge)</span>
                 <textarea id="textInput" placeholder="Skriv eller klistra in din text här...">I EN VÄRLD DÅRKRAFTEN RÅDER EN MAN STÅR UPP FÖR RÄTTVISAN DETTA ÄR HISTORIEN OM EN HjÄLTE SOM KOMMER ATT FÖRÄNDRA ALLT</textarea>
             </label>
             <div class="word-count">
@@ -687,6 +706,14 @@
 
         <div class="control-group">
             <label>
+                <span class="section-title">Utseende</span>
+                Skuggfärg
+            </label>
+            <input type="color" id="textShadowColor" value="#000000">
+        </div>
+
+        <div class="control-group">
+            <label>
                 <span class="section-title">Typsnitt</span>
                 Stil
             </label>
@@ -713,6 +740,16 @@
                 <option value="zoom">Zoom</option>
                 <option value="blur">Blur</option>
                 <option value="glitch">Glitch</option>
+            </select>
+        </div>
+
+        <div class="control-group">
+            <label>
+                <span class="section-title">Animation</span>
+                Stil
+            </label>
+            <select id="animationMode">
+                <option value="standard">Standard</option>
                 <option value="cinematic">🎬 Cinematic</option>
             </select>
         </div>
@@ -722,7 +759,7 @@
                 <span class="section-title">Timing</span>
                 Hastighet (ms)
             </label>
-            <input type="number" id="speed" min="100" max="10000" value="1200" step="1">
+            <input type="number" id="speed" min="100" max="10000" value="700" step="1">
         </div>
 
         <div class="control-group">
@@ -732,10 +769,6 @@
             </label>
             <select id="speedVariation">
                 <option value="none">Konstant</option>
-                <option value="low">Liten (±20%)</option>
-                <option value="medium">Medium (±40%)</option>
-                <option value="high">Hög (±60%)</option>
-                <option value="extreme">Extrem (±80%)</option>
                 <option value="random">Slump (500-1000ms)</option>
             </select>
         </div>
@@ -764,10 +797,11 @@
             <input type="number" id="cinematicDefaultDuration" min="100" max="15000" value="3200" step="1">
         </div>
 
-        <button class="btn btn-primary" id="playBtn">▶ Spela</button>
-        <button class="btn btn-stop" id="stopBtn">■ Stoppa</button>
-        <div style="flex: 1;"></div>
-        <button class="btn btn-record" id="recordBtn">● Spela in</button>
+        <div style="display: flex; gap: 12px; width: 100%; margin-top: 10px;">
+            <button class="btn btn-primary" id="playBtn" style="flex: 1; padding: 18px 24px; font-size: 16px;">▶ Spela</button>
+            <button class="btn btn-stop" id="stopBtn" style="flex: 1; padding: 18px 24px; font-size: 16px;">■ Stoppa</button>
+            <button class="btn btn-record" id="recordBtn" style="flex: 1; padding: 18px 24px; font-size: 16px;">● Spela in</button>
+        </div>
     </div>
 
     <div id="canvas-container">
@@ -779,12 +813,21 @@
     </div>
 
     <aside class="slide-inspector">
-        <h3>Slide Inspector</h3>
+        <h3>Vald Slide</h3>
         <div class="inspector-card">
             <span class="inspector-label" id="slideInspectorTitle">Slide 1</span>
             <div class="inspector-preview" id="slideInspectorPreview"></div>
         </div>
         <div class="inspector-card">
+            <label class="inspector-label" for="slideTextInput">Redigera slide-text</label>
+            <textarea id="slideTextInput" rows="4" placeholder="Redigera texten för denna slide..."></textarea>
+            <p class="inspector-meta">Ändringar sparas direkt till denna slide.</p>
+        </div>
+        <div class="inspector-card">
+            <button class="btn btn-primary" id="duplicateSlideBtn" style="width: 100%;">📋 Duplicera slide</button>
+            <p class="inspector-meta" style="margin-top: 8px; text-align: center;">Skapar en kopia av den valda sliden (eller tom slide).</p>
+        </div>
+        <div class="inspector-card" id="slideDurationInspectorCard">
             <label class="inspector-label" for="slideDurationInput">Varaktighet</label>
             <input type="number" id="slideDurationInput" min="100" max="10000" step="1">
             <p class="inspector-meta" id="slideDurationMeta"></p>
@@ -793,6 +836,14 @@
             <label class="inspector-label" for="slideCinematicDurationInput">Cinematic Varaktighet</label>
             <input type="number" id="slideCinematicDurationInput" min="100" max="15000" step="1">
             <p class="inspector-meta" id="slideCinematicDurationMeta"></p>
+        </div>
+        <div class="inspector-card">
+            <span class="inspector-label">Animation</span>
+            <p class="inspector-meta" id="slideAnimationMeta"></p>
+        </div>
+        <div class="inspector-card">
+            <span class="inspector-label">Effekt</span>
+            <p class="inspector-meta" id="slideTransitionMeta"></p>
         </div>
     </aside>
 
@@ -820,9 +871,11 @@
         const bgImage = document.getElementById('bgImage');
         const fileName = document.getElementById('fileName');
         const textColor = document.getElementById('textColor');
+        const textShadowColor = document.getElementById('textShadowColor');
         const textShadowStrength = document.getElementById('textShadowStrength');
         const fontFamily = document.getElementById('fontFamily');
         const transition = document.getElementById('transition');
+        const animationMode = document.getElementById('animationMode');
         const speed = document.getElementById('speed');
         const speedVariation = document.getElementById('speedVariation');
         const wordsPerFrame = document.getElementById('wordsPerFrame');
@@ -837,11 +890,16 @@
         const frameCounter = document.getElementById('frameCounter');
         const slideInspectorTitle = document.getElementById('slideInspectorTitle');
         const slideInspectorPreview = document.getElementById('slideInspectorPreview');
+        const slideDurationInspectorCard = document.getElementById('slideDurationInspectorCard');
         const slideDurationInput = document.getElementById('slideDurationInput');
         const slideDurationMeta = document.getElementById('slideDurationMeta');
         const slideCinematicInspectorCard = document.getElementById('slideCinematicInspectorCard');
         const slideCinematicDurationInput = document.getElementById('slideCinematicDurationInput');
         const slideCinematicDurationMeta = document.getElementById('slideCinematicDurationMeta');
+        const slideAnimationMeta = document.getElementById('slideAnimationMeta');
+        const slideTransitionMeta = document.getElementById('slideTransitionMeta');
+        const slideTextInput = document.getElementById('slideTextInput');
+        const duplicateSlideBtn = document.getElementById('duplicateSlideBtn');
 
         let slides = [];
         let slideWordRanges = [];
@@ -869,11 +927,12 @@
         });
 
         // Show/hide cinematic options
-        transition.addEventListener('change', () => {
+        animationMode.addEventListener('change', () => {
             cinematicOptions.forEach(option => {
-                option.style.display = transition.value === 'cinematic' ? 'flex' : 'none';
+                option.style.display = animationMode.value === 'cinematic' ? 'flex' : 'none';
             });
             updateInspector();
+            drawFrame();
         });
 
         bgImage.addEventListener('change', (e) => {
@@ -909,7 +968,7 @@
 
         speed.addEventListener('change', () => {
             const parsedValue = parseInt(speed.value, 10);
-            const safeValue = Number.isNaN(parsedValue) ? 1200 : Math.min(10000, Math.max(100, parsedValue));
+            const safeValue = Number.isNaN(parsedValue) ? 700 : Math.min(10000, Math.max(100, parsedValue));
             speed.value = safeValue;
             updateInspector();
         });
@@ -921,7 +980,7 @@
 
             event.preventDefault();
             const currentValue = parseInt(speed.value, 10);
-            const baseValue = Number.isNaN(currentValue) ? 1200 : currentValue;
+            const baseValue = Number.isNaN(currentValue) ? 700 : currentValue;
             const delta = event.key === 'ArrowUp' ? 100 : -100;
             const nextValue = Math.min(10000, Math.max(100, baseValue + delta));
             speed.value = nextValue;
@@ -940,33 +999,22 @@
 
         function getVariedSpeed(baseSpeed) {
             const variation = speedVariation.value;
-            let minMultiplier, maxMultiplier;
-            
-            switch (variation) {
-                case 'low':
-                    minMultiplier = 0.8;
-                    maxMultiplier = 1.2;
-                    break;
-                case 'medium':
-                    minMultiplier = 0.6;
-                    maxMultiplier = 1.4;
-                    break;
-                case 'high':
-                    minMultiplier = 0.4;
-                    maxMultiplier = 1.6;
-                    break;
-                case 'extreme':
-                    minMultiplier = 0.2;
-                    maxMultiplier = 1.8;
-                    break;
-                case 'random':
-                    return Math.random() * 500 + 500; // 500-1000ms
-                default: // none
-                    return baseSpeed;
+
+            if (variation === 'random') {
+                return Math.random() * 500 + 500; // 500-1000ms
             }
-            
-            const multiplier = Math.random() * (maxMultiplier - minMultiplier) + minMultiplier;
-            return Math.round(baseSpeed * multiplier);
+
+            // 'none' - constant speed
+            return baseSpeed;
+        }
+
+        function hexToRgb(hex) {
+            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? {
+                r: parseInt(result[1], 16),
+                g: parseInt(result[2], 16),
+                b: parseInt(result[3], 16)
+            } : { r: 0, g: 0, b: 0 };
         }
 
         wordsPerFrame.addEventListener('input', () => {
@@ -977,7 +1025,7 @@
             drawFrame();
         });
 
-        [color1, color2, textColor, fontFamily, transition, highlightWordsInput].forEach(control => {
+        [color1, color2, textColor, textShadowColor, fontFamily, transition, animationMode, highlightWordsInput].forEach(control => {
             control.addEventListener('input', () => {
                 drawFrame();
             });
@@ -1026,7 +1074,7 @@
         }
 
         function getGlobalSpeedValue() {
-            return Math.min(10000, Math.max(100, parseInt(speed.value, 10) || 1200));
+            return Math.min(10000, Math.max(100, parseInt(speed.value, 10) || 700));
         }
 
         function getDefaultCinematicSpeedValue() {
@@ -1062,7 +1110,8 @@
         }
 
         function updateInspector() {
-            const isCinematic = transition.value === 'cinematic';
+            const isCinematic = animationMode.value === 'cinematic';
+            slideDurationInspectorCard.style.display = isCinematic ? 'none' : 'block';
             slideCinematicInspectorCard.style.display = isCinematic ? 'block' : 'none';
 
             if (slides.length === 0) {
@@ -1074,27 +1123,52 @@
                 slideCinematicDurationInput.value = getDefaultCinematicSpeedValue();
                 slideCinematicDurationInput.disabled = true;
                 slideCinematicDurationMeta.textContent = 'Cinematic-standard visas när cinematic är vald.';
+                slideAnimationMeta.textContent = 'Ingen animation';
+                slideTransitionMeta.textContent = 'Ingen övergångseffekt';
+                slideTextInput.value = '';
+                slideTextInput.disabled = true;
                 return;
             }
 
             const slideText = slides[currentSlideIndex].map(word => parseDisplayWord(word).text).join(' ');
             const customValue = slideDurations[currentSlideIndex];
-            const effectiveValue = getSlideSpeedValue(currentSlideIndex);
+            const globalSpeedValue = getGlobalSpeedValue();
+            const effectiveValue = Number.isFinite(customValue) ? Math.min(10000, Math.max(100, customValue)) : globalSpeedValue;
             const customCinematicValue = slideCinematicDurations[currentSlideIndex];
             const effectiveCinematicValue = getCinematicSlideSpeedValue(currentSlideIndex);
 
-            slideInspectorTitle.textContent = `Slide ${currentSlideIndex + 1}`;
+            slideInspectorTitle.textContent = `Slide ${currentSlideIndex + 1} av ${slides.length}`;
             slideInspectorPreview.textContent = slideText || 'Tom slide';
-            slideDurationInput.value = effectiveValue;
+            slideDurationInput.value = Number.isFinite(customValue) ? customValue : globalSpeedValue;
             slideDurationInput.disabled = isPlaying || isRecording;
             slideDurationMeta.textContent = Number.isFinite(customValue)
-                ? `Specifik varaktighet aktiv. Global timing är ${getGlobalSpeedValue()} ms.`
-                : `Använder global timing på ${getGlobalSpeedValue()} ms tills du ändrar denna slide.`;
-            slideCinematicDurationInput.value = effectiveCinematicValue;
+                ? `Override aktiv. Global timing är ${globalSpeedValue} ms.`
+                : `Använder global timing på ${globalSpeedValue} ms.`;
+            slideCinematicDurationInput.value = Number.isFinite(customCinematicValue) ? customCinematicValue : getDefaultCinematicSpeedValue();
             slideCinematicDurationInput.disabled = !isCinematic || isPlaying || isRecording;
             slideCinematicDurationMeta.textContent = Number.isFinite(customCinematicValue)
-                ? `Specifik cinematic-varaktighet aktiv. Standard är ${getDefaultCinematicSpeedValue()} ms.`
-                : `Använder cinematic-standard på ${getDefaultCinematicSpeedValue()} ms tills du ändrar denna slide.`;
+                ? `Override aktiv. Cinematic-standard är ${getDefaultCinematicSpeedValue()} ms.`
+                : `Använder cinematic-standard på ${getDefaultCinematicSpeedValue()} ms.`;
+            
+            // Animation info
+            const animationValue = animationMode.value;
+            slideAnimationMeta.textContent = animationValue === 'standard' ? 'Standard' : '🎬 Cinematic';
+            
+            // Transition info
+            const transitionValue = transition.value;
+            const transitionNames = {
+                'none': 'Ingen övergångseffekt',
+                'fade': 'Fade',
+                'slide': 'Slide',
+                'zoom': 'Zoom',
+                'blur': 'Blur',
+                'glitch': 'Glitch'
+            };
+            slideTransitionMeta.textContent = transitionNames[transitionValue] || 'Ingen övergångseffekt';
+            
+            // Slide text editor
+            slideTextInput.value = slideText;
+            slideTextInput.disabled = isPlaying || isRecording;
         }
 
         function updateWordCount() {
@@ -1168,6 +1242,29 @@
             updateInspector();
         });
 
+        slideDurationInput.addEventListener('change', () => {
+            if (slides.length === 0) {
+                return;
+            }
+
+            if (slideDurationInput.value === '') {
+                slideDurations[currentSlideIndex] = null;
+                updateInspector();
+                return;
+            }
+
+            const parsedValue = parseInt(slideDurationInput.value, 10);
+            if (Number.isNaN(parsedValue)) {
+                slideDurations[currentSlideIndex] = null;
+                updateInspector();
+                return;
+            }
+
+            slideDurations[currentSlideIndex] = Math.min(10000, Math.max(100, parsedValue));
+            slideDurationInput.value = slideDurations[currentSlideIndex];
+            updateInspector();
+        });
+
         slideCinematicDurationInput.addEventListener('input', () => {
             if (slides.length === 0 || slideCinematicDurationInput.value === '') {
                 return;
@@ -1181,6 +1278,72 @@
             slideCinematicDurations[currentSlideIndex] = Math.min(15000, Math.max(100, parsedValue));
             slideCinematicDurationInput.value = slideCinematicDurations[currentSlideIndex];
             updateInspector();
+        });
+
+        slideTextInput.addEventListener('input', () => {
+            if (slides.length === 0 || isPlaying || isRecording) {
+                return;
+            }
+
+            const newText = slideTextInput.value.trim();
+            const newWords = newText.split(/\s+/).filter(w => w.length > 0);
+            
+            if (newWords.length > 0) {
+                slides[currentSlideIndex] = newWords;
+                slideWordRanges[currentSlideIndex].end = slideWordRanges[currentSlideIndex].start + newWords.length - 1;
+            } else {
+                slides[currentSlideIndex] = [];
+                slideWordRanges[currentSlideIndex].end = slideWordRanges[currentSlideIndex].start - 1;
+            }
+            
+            buildTimeline(slides);
+            updateTimelineActive();
+            drawFrame();
+        });
+
+        duplicateSlideBtn.addEventListener('click', () => {
+            if (isPlaying || isRecording) {
+                return;
+            }
+
+            let newSlideWords = [];
+            let newDuration = null;
+            let newCinematicDuration = null;
+
+            if (slides.length > 0) {
+                // Copy current slide content
+                newSlideWords = [...slides[currentSlideIndex]];
+                newDuration = slideDurations[currentSlideIndex] || null;
+                newCinematicDuration = slideCinematicDurations[currentSlideIndex] || null;
+            }
+
+            // Insert new slide after current index
+            const insertIndex = currentSlideIndex + 1;
+            slides.splice(insertIndex, 0, newSlideWords);
+            
+            // Copy duration settings
+            slideDurations.splice(insertIndex, 0, newDuration);
+            slideCinematicDurations.splice(insertIndex, 0, newCinematicDuration);
+            
+            // Recalculate word ranges for all slides
+            let totalWords = 0;
+            slideWordRanges = slides.map(slideWords => {
+                const start = totalWords + 1;
+                totalWords += slideWords.length;
+                return { start, end: totalWords };
+            });
+            
+            // Update word count
+            wordCount.textContent = totalWords;
+            
+            // Select the new slide
+            currentSlideIndex = insertIndex;
+            
+            // Rebuild timeline and update UI
+            buildTimeline(slides);
+            updateTimelineActive();
+            updateInspector();
+            drawFrame();
         });
 
         cinematicDefaultDuration.addEventListener('input', () => {
@@ -1331,7 +1494,7 @@
             const text = parsedWords.map(word => word.text).join(' ');
 
             // Cinematic mode - render with effects
-            if (transition.value === 'cinematic') {
+            if (animationMode.value === 'cinematic') {
                 drawCinematicFrame(parsedWords, transitionProg);
                 return;
             }
@@ -1345,7 +1508,9 @@
 
             // Add configurable text shadow
             const shadowStrength = Math.min(100, Math.max(0, parseInt(textShadowStrength.value, 10) || 0));
-            ctx.shadowColor = `rgba(0, 0, 0, ${shadowStrength / 100})`;
+            const shadowColorHex = textShadowColor.value || '#000000';
+            const shadowColorRgb = hexToRgb(shadowColorHex);
+            ctx.shadowColor = `rgba(${shadowColorRgb.r}, ${shadowColorRgb.g}, ${shadowColorRgb.b}, ${shadowStrength / 100})`;
             ctx.shadowBlur = shadowStrength > 0 ? 30 : 0;
             ctx.shadowOffsetX = shadowStrength > 0 ? 5 : 0;
             ctx.shadowOffsetY = shadowStrength > 0 ? 5 : 0;
@@ -1360,24 +1525,6 @@
             ctx.shadowOffsetY = 0;
             ctx.globalAlpha = 1;
             ctx.filter = 'none';
-
-            // Add film grain overlay (subtle)
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.015)';
-            for (let i = 0; i < 800; i++) {
-                const x = Math.random() * canvas.width;
-                const y = Math.random() * canvas.height;
-                ctx.fillRect(x, y, 2, 2);
-            }
-
-            // Add subtle vignette
-            const gradient = ctx.createRadialGradient(
-                canvas.width / 2, canvas.height / 2, canvas.height / 3,
-                canvas.width / 2, canvas.height / 2, canvas.height
-            );
-            gradient.addColorStop(0, 'rgba(0, 0, 0, 0)');
-            gradient.addColorStop(1, 'rgba(0, 0, 0, 0.4)');
-            ctx.fillStyle = gradient;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
         }
 
         function drawCinematicFrame(parsedWords, progress) {
@@ -1498,14 +1645,15 @@
             if (!isPlaying) return;
 
             const transType = transition.value;
+            const isCinematic = animationMode.value === 'cinematic';
             const slideBaseSpeed = getSlideSpeedValue(currentSlideIndex);
             const hasCustomDuration = Number.isFinite(slideDurations[currentSlideIndex]);
-            const currentSpeed = transType === 'cinematic'
+            const currentSpeed = isCinematic
                 ? getCinematicSlideSpeedValue(currentSlideIndex)
                 : (hasCustomDuration ? slideBaseSpeed : getVariedSpeed(slideBaseSpeed));
             
             const slideDuration = currentSpeed;
-            currentSlideDuration = slideDuration * (transType === 'cinematic' ? 0.55 : 0.3);
+            currentSlideDuration = slideDuration * (isCinematic ? 0.55 : 0.3);
 
             slideStartTime = performance.now();
 
@@ -1536,7 +1684,7 @@
                     }
 
                     const range = slideWordRanges[currentSlideIndex];
-                    statusText.textContent = `Visar slide ${currentSlideIndex + 1}/${slides.length} (${transition.value === 'cinematic' ? getCinematicSlideSpeedValue(currentSlideIndex) : getSlideSpeedValue(currentSlideIndex)}ms)`;
+                    statusText.textContent = `Visar slide ${currentSlideIndex + 1}/${slides.length} (${animationMode.value === 'cinematic' ? getCinematicSlideSpeedValue(currentSlideIndex) : getSlideSpeedValue(currentSlideIndex)}ms)`;
                     frameCounter.textContent = range ? `Ord: ${range.start}-${range.end}` : '';
                     updateTimelineActive();
                     updateInspector();
@@ -1552,9 +1700,7 @@
 
         function play() {
             if (isPlaying) return;
-            
-            updateWordCount();
-            
+
             if (slides.length === 0) {
                 statusText.textContent = '⚠ Ingen text att visa!';
                 return;
@@ -1605,14 +1751,15 @@
             if (!isRecording) return;
 
             const transType = transition.value;
+            const isCinematic = animationMode.value === 'cinematic';
             const slideBaseSpeed = getSlideSpeedValue(currentSlideIndex);
             const hasCustomDuration = Number.isFinite(slideDurations[currentSlideIndex]);
-            const currentSpeed = transType === 'cinematic'
+            const currentSpeed = isCinematic
                 ? getCinematicSlideSpeedValue(currentSlideIndex)
                 : (hasCustomDuration ? slideBaseSpeed : getVariedSpeed(slideBaseSpeed));
             
             const slideDuration = currentSpeed;
-            currentSlideDuration = slideDuration * (transType === 'cinematic' ? 0.55 : 0.3);
+            currentSlideDuration = slideDuration * (isCinematic ? 0.55 : 0.3);
 
             slideStartTime = performance.now();
 
@@ -1645,7 +1792,7 @@
                     }
 
                     const range = slideWordRanges[currentSlideIndex];
-                    statusText.textContent = `Spelar in slide ${currentSlideIndex + 1}/${slides.length} (${transition.value === 'cinematic' ? getCinematicSlideSpeedValue(currentSlideIndex) : getSlideSpeedValue(currentSlideIndex)}ms)`;
+                    statusText.textContent = `Spelar in slide ${currentSlideIndex + 1}/${slides.length} (${animationMode.value === 'cinematic' ? getCinematicSlideSpeedValue(currentSlideIndex) : getSlideSpeedValue(currentSlideIndex)}ms)`;
                     frameCounter.textContent = range ? `Ord: ${range.start}-${range.end}` : '';
                     updateTimelineActive();
                     updateInspector();
@@ -1718,8 +1865,7 @@
             };
 
             isRecording = true;
-            updateWordCount();
-            
+
             if (slides.length === 0) {
                 statusText.textContent = '⚠ Ingen text att visa!';
                 isRecording = false;
