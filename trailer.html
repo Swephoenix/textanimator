@@ -15,6 +15,9 @@
         :root {
             --left-sidebar-width: 400px;
             --inspector-width: 320px;
+            --controls-bar-height: 180px;
+            --timeline-height: 142px;
+            --status-bar-height: 50px;
         }
 
         body {
@@ -348,14 +351,15 @@
 
         #canvas-container {
             position: fixed;
-            top: 100px;
+            top: var(--controls-bar-height);
             left: var(--left-sidebar-width);
             right: var(--inspector-width);
-            bottom: 50px;
+            bottom: calc(var(--timeline-height) + var(--status-bar-height));
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 20px;
+            padding: 24px 24px 18px;
+            background: linear-gradient(180deg, rgba(255,255,255,0.35) 0%, rgba(248,250,252,0.7) 100%);
         }
 
         canvas {
@@ -364,6 +368,10 @@
             overflow: hidden;
             max-height: 100%;
             max-width: 100%;
+            width: min(100%, calc((100vh - var(--controls-bar-height) - var(--timeline-height) - var(--status-bar-height) - 42px) * 16 / 9));
+            aspect-ratio: 16 / 9;
+            height: auto;
+            background: #000;
         }
 
         .status-bar {
@@ -455,10 +463,10 @@
         /* Timeline */
         .timeline-container {
             position: fixed;
-            bottom: 50px;
+            bottom: var(--status-bar-height);
             left: var(--left-sidebar-width);
             right: var(--inspector-width);
-            height: 100px;
+            height: var(--timeline-height);
             background: #fff;
             border-top: 1px solid #e8e8e8;
             overflow-x: auto;
@@ -467,14 +475,23 @@
 
         .timeline {
             display: flex;
-            align-items: center;
+            align-items: flex-end;
             gap: 8px;
-            padding: 15px 20px;
+            padding: 12px 20px 10px;
             height: 100%;
         }
 
-        .timeline-slide {
+        .timeline-item {
             min-width: 140px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+
+        .timeline-slide {
             height: 70px;
             background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%);
             border: 2px solid #e0e0e0;
@@ -482,7 +499,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 8px;
+            padding: 12px 8px;
             cursor: pointer;
             transition: all 0.3s ease;
             position: relative;
@@ -500,8 +517,18 @@
             box-shadow: 0 4px 15px rgba(102,126,234,0.4);
         }
 
+        .timeline-slide.selected:not(.active) {
+            border-color: #8ea2ff;
+            background: linear-gradient(135deg, #eef2ff 0%, #dbe4ff 100%);
+            box-shadow: 0 4px 14px rgba(102,126,234,0.18);
+        }
+
         .timeline-slide.active .slide-text {
             color: #fff;
+        }
+
+        .timeline-slide.selected .slide-text {
+            color: #3f4c75;
         }
 
         .slide-text {
@@ -515,6 +542,81 @@
             -webkit-line-clamp: 3;
             -webkit-box-orient: vertical;
             max-width: 100%;
+        }
+
+        .timeline-duration-lane {
+            height: 42px;
+            border-radius: 8px;
+            background: linear-gradient(180deg, rgba(241,245,249,0.95) 0%, rgba(226,232,240,0.9) 100%);
+            border: 1px solid #d7deea;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            position: relative;
+            padding: 18px 10px 6px;
+        }
+
+        .timeline-item.active .timeline-duration-lane {
+            background: linear-gradient(180deg, rgba(102,126,234,0.18) 0%, rgba(118,75,162,0.26) 100%);
+            border-color: rgba(102,126,234,0.45);
+        }
+
+        .timeline-item.selected:not(.active) .timeline-duration-lane {
+            background: linear-gradient(180deg, rgba(224,231,255,0.95) 0%, rgba(199,210,254,0.9) 100%);
+            border-color: #b8c5ff;
+        }
+
+        .slide-duration-label {
+            position: absolute;
+            top: 4px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: 0.4px;
+            color: #7c8598;
+        }
+
+        .timeline-item.active .slide-duration-label {
+            color: #4c63d2;
+        }
+
+        .timeline-item.selected:not(.active) .slide-duration-label {
+            color: #5563aa;
+        }
+
+        .slide-duration-track {
+            width: 18px;
+            height: 100%;
+            background: rgba(148, 163, 184, 0.28);
+            border-radius: 3px;
+            overflow: hidden;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+        }
+
+        .slide-duration-bar {
+            height: 0;
+            width: 100%;
+            border-radius: 0;
+            background: linear-gradient(180deg, var(--duration-color-start, #60a5fa) 0%, var(--duration-color-end, #6366f1) 100%);
+        }
+
+        .timeline-item.active .slide-duration-track {
+            background: rgba(102,126,234,0.2);
+        }
+
+        .timeline-item.active .slide-duration-bar {
+            background: linear-gradient(180deg, color-mix(in srgb, var(--duration-color-start, #60a5fa) 72%, white) 0%, color-mix(in srgb, var(--duration-color-end, #6366f1) 88%, black) 100%);
+        }
+
+        .timeline-item.selected:not(.active) .slide-duration-track {
+            background: rgba(85, 99, 170, 0.18);
+        }
+
+        .timeline-item.selected:not(.active) .slide-duration-bar {
+            background: linear-gradient(180deg, color-mix(in srgb, var(--duration-color-start, #60a5fa) 82%, white) 0%, color-mix(in srgb, var(--duration-color-end, #6366f1) 82%, black) 100%);
         }
 
         .slide-number {
@@ -531,6 +633,10 @@
 
         .timeline-slide.active .slide-number {
             color: #667eea;
+        }
+
+        .timeline-slide.selected:not(.active) .slide-number {
+            color: #5563aa;
         }
 
         .timeline::-webkit-scrollbar {
@@ -659,7 +765,7 @@
             <div class="word-count">
                 Ord: <span id="wordCount">0</span>
             </div>
-            <p class="input-guide">Skriv <code>///</code> för att flytta nästa ord till nästa slide. Skriv <code>[[ord]]</code> för att highlighta ordet i cinematic-läget.</p>
+            <p class="input-guide">Skriv <code>///</code> för att flytta nästa ord till nästa slide. Skriv <code>ab.c</code> eller <code>.c</code> för att tvinga <code>c</code> till nästa slide. Skriv <code>[[ord]]</code> för att highlighta ordet i cinematic-läget.</p>
         </div>
     </aside>
 
@@ -768,21 +874,14 @@
 
         <div class="control-group">
             <label>
-                <span class="section-title">Slide-tid</span>
-                Hastighet (ms)
+                <span class="section-title">Slides</span>
+                Standard varaktighet (ms)
             </label>
             <input type="number" id="speed" min="100" max="10000" value="700" step="1">
         </div>
 
         <div class="control-group">
-            <label>
-                <span class="section-title">Variation</span>
-                Typ
-            </label>
-            <select id="speedVariation">
-                <option value="none">Konstant</option>
-                <option value="random">Slump (300-1000ms)</option>
-            </select>
+            <button class="btn btn-primary" id="randomizeDurationsBtn" type="button">Slumpa varaktighetstider</button>
         </div>
 
         <div class="control-group">
@@ -807,6 +906,16 @@
                 Standardtid (ms)
             </label>
             <input type="number" id="cinematicDefaultDuration" min="100" max="15000" value="3200" step="1">
+        </div>
+
+        <div class="control-group">
+            <label>
+                <span class="section-title">Outro-slide</span>
+                Text
+            </label>
+            <textarea id="outroTextInput" placeholder="Skriv outro-text. Ny rad = ny textrad.">Andreas
+Poddcast</textarea>
+            <button class="btn btn-primary" id="addOutroSlideBtn">+ Lägg till outro</button>
         </div>
 
         <div style="display: flex; gap: 12px; width: 100%; margin-top: 10px;">
@@ -877,6 +986,9 @@
         const textInput = document.getElementById('textInput');
         const wordCount = document.getElementById('wordCount');
         const timeline = document.getElementById('timeline');
+        const controlsBar = document.querySelector('.controls-bar');
+        const timelineContainer = document.querySelector('.timeline-container');
+        const statusBar = document.querySelector('.status-bar');
         const bgType = document.getElementById('bgType');
         const color1 = document.getElementById('color1');
         const color2 = document.getElementById('color2');
@@ -889,7 +1001,7 @@
         const transition = document.getElementById('transition');
         const animationMode = document.getElementById('animationMode');
         const speed = document.getElementById('speed');
-        const speedVariation = document.getElementById('speedVariation');
+        const randomizeDurationsBtn = document.getElementById('randomizeDurationsBtn');
         const wordsPerFrame = document.getElementById('wordsPerFrame');
         const highlightWordsInput = document.getElementById('highlightWords');
         const cinematicDefaultDuration = document.getElementById('cinematicDefaultDuration');
@@ -912,11 +1024,17 @@
         const slideTransitionMeta = document.getElementById('slideTransitionMeta');
         const slideTextInput = document.getElementById('slideTextInput');
         const duplicateSlideBtn = document.getElementById('duplicateSlideBtn');
+        const outroTextInput = document.getElementById('outroTextInput');
+        const addOutroSlideBtn = document.getElementById('addOutroSlideBtn');
 
         let slides = [];
         let slideWordRanges = [];
         let slideDurations = [];
         let slideCinematicDurations = [];
+        let slideTypes = [];
+        let slideCustomTexts = [];
+        let selectedSlideIndexes = new Set();
+        let lastSelectedSlideIndex = null;
         let currentSlideIndex = 0;
         let isPlaying = false;
         let isRecording = false;
@@ -926,6 +1044,8 @@
         let recordedChunks = [];
         let transitionProgress = 0;
         let animationFrame = null;
+        let previewAnimationFrame = null;
+        let previewSelectedSlideIndex = null;
         let slideStartTime = 0;
         let currentSlideDuration = 0;
 
@@ -950,6 +1070,7 @@
             }
             
             document.querySelector('.image-input').style.display = bgTypeValue === 'image' ? 'flex' : 'none';
+            syncLayoutMetrics();
             drawFrame();
         });
 
@@ -958,6 +1079,9 @@
             cinematicOptions.forEach(option => {
                 option.style.display = animationMode.value === 'cinematic' ? 'flex' : 'none';
             });
+            syncLayoutMetrics();
+            buildTimeline(slides);
+            updateTimelineActive();
             updateInspector();
             drawFrame();
         });
@@ -1024,15 +1148,13 @@
             drawFrame();
         });
 
-        function getVariedSpeed(baseSpeed) {
-            const variation = speedVariation.value;
-
-            if (variation === 'random') {
-                return Math.random() * 700 + 300; // 300-1000ms
-            }
-
-            // 'none' - constant speed
-            return baseSpeed;
+        function getRandomizedSlideDuration(baseSpeed) {
+            const minDuration = 300;
+            const maxDuration = 1000;
+            const normalizedBase = Math.min(maxDuration, Math.max(minDuration, baseSpeed));
+            const spread = 220;
+            const randomized = normalizedBase + (Math.random() * 2 - 1) * spread;
+            return Math.round(Math.min(maxDuration, Math.max(minDuration, randomized)));
         }
 
         function hexToRgb(hex) {
@@ -1087,10 +1209,36 @@
                 wordStart = totalWords + 1;
             }
 
-            segments.forEach(segmentWords => {
-                for (let i = 0; i < segmentWords.length; i += wordsCount) {
-                    pushSlide(segmentWords.slice(i, i + wordsCount));
+            function expandToken(rawWord) {
+                const matches = rawWord.match(/\.+|[^.]+(?:\.+)?/g);
+
+                if (!matches || matches.length === 1) {
+                    return [{ word: rawWord, forceBreakAfter: false }];
                 }
+
+                return matches.map((part, index) => ({
+                    word: part,
+                    forceBreakAfter: part.includes('.') || index < matches.length - 1
+                }));
+            }
+
+            segments.forEach(segmentWords => {
+                let currentSlideWords = [];
+
+                segmentWords.forEach(rawWord => {
+                    const expandedWords = expandToken(rawWord);
+
+                    expandedWords.forEach(({ word, forceBreakAfter }) => {
+                        currentSlideWords.push(word);
+
+                        if (currentSlideWords.length >= wordsCount || forceBreakAfter) {
+                            pushSlide(currentSlideWords);
+                            currentSlideWords = [];
+                        }
+                    });
+                });
+
+                pushSlide(currentSlideWords);
             });
 
             return {
@@ -1098,6 +1246,211 @@
                 ranges: nextRanges,
                 totalWords
             };
+        }
+
+        function syncLayoutMetrics() {
+            const rootStyle = document.documentElement.style;
+            const controlsHeight = controlsBar ? Math.ceil(controlsBar.getBoundingClientRect().height) : 180;
+            const timelineHeight = timelineContainer ? Math.ceil(timelineContainer.getBoundingClientRect().height) : 100;
+            const statusHeight = statusBar ? Math.ceil(statusBar.getBoundingClientRect().height) : 50;
+
+            rootStyle.setProperty('--controls-bar-height', `${controlsHeight}px`);
+            rootStyle.setProperty('--timeline-height', `${timelineHeight}px`);
+            rootStyle.setProperty('--status-bar-height', `${statusHeight}px`);
+        }
+
+        function splitOutroTextIntoLines(text) {
+            const trimmed = (text || '').trim();
+            if (!trimmed) {
+                return ['OUTRO', 'TEXT'];
+            }
+
+            const explicitLines = trimmed.split(/\n+/).map(line => line.trim()).filter(Boolean);
+            if (explicitLines.length >= 2) {
+                return [
+                    explicitLines[0],
+                    explicitLines.slice(1).join(' ')
+                ];
+            }
+
+            const words = trimmed.split(/\s+/).filter(Boolean);
+            if (words.length <= 1) {
+                return [trimmed, ''];
+            }
+
+            let bestIndex = 1;
+            let bestDiff = Infinity;
+            for (let i = 1; i < words.length; i += 1) {
+                const left = words.slice(0, i).join(' ');
+                const right = words.slice(i).join(' ');
+                const diff = Math.abs(left.length - right.length);
+                if (diff < bestDiff) {
+                    bestDiff = diff;
+                    bestIndex = i;
+                }
+            }
+
+            return [
+                words.slice(0, bestIndex).join(' '),
+                words.slice(bestIndex).join(' ')
+            ];
+        }
+
+        function getSlideType(index) {
+            return slideTypes[index] || 'standard';
+        }
+
+        function getSlideText(index) {
+            if (getSlideType(index) === 'outro') {
+                return slideCustomTexts[index] || '';
+            }
+
+            return (slides[index] || []).map(word => parseDisplayWord(word).text).join(' ');
+        }
+
+        function syncSlideMetadata() {
+            slideTypes = slides.map((_, index) => slideTypes[index] || 'standard');
+            slideCustomTexts = slides.map((_, index) => slideCustomTexts[index] || '');
+        }
+
+        function rebuildSlideWordRanges() {
+            let totalWords = 0;
+            slideWordRanges = slides.map(slideWords => {
+                const start = totalWords + 1;
+                totalWords += slideWords.length;
+                return { start, end: totalWords };
+            });
+            wordCount.textContent = totalWords;
+        }
+
+        function syncSelectedSlides() {
+            selectedSlideIndexes = new Set(
+                [...selectedSlideIndexes].filter(index => index >= 0 && index < slides.length)
+            );
+
+            if (slides.length === 0) {
+                selectedSlideIndexes.clear();
+                lastSelectedSlideIndex = null;
+                return;
+            }
+
+            if (!selectedSlideIndexes.has(currentSlideIndex)) {
+                selectedSlideIndexes.add(currentSlideIndex);
+            }
+
+            if (!selectedSlideIndexes.has(lastSelectedSlideIndex)) {
+                lastSelectedSlideIndex = currentSlideIndex;
+            }
+        }
+
+        function selectSingleSlide(index) {
+            currentSlideIndex = index;
+            selectedSlideIndexes = new Set([index]);
+            lastSelectedSlideIndex = index;
+        }
+
+        function selectSlideRange(startIndex, endIndex) {
+            const [start, end] = startIndex <= endIndex
+                ? [startIndex, endIndex]
+                : [endIndex, startIndex];
+
+            selectedSlideIndexes = new Set();
+            for (let index = start; index <= end; index += 1) {
+                selectedSlideIndexes.add(index);
+            }
+
+            currentSlideIndex = endIndex;
+            lastSelectedSlideIndex = endIndex;
+        }
+
+        function toggleSlideSelection(index) {
+            if (selectedSlideIndexes.has(index) && selectedSlideIndexes.size > 1) {
+                selectedSlideIndexes.delete(index);
+            } else {
+                selectedSlideIndexes.add(index);
+                currentSlideIndex = index;
+            }
+
+            if (!selectedSlideIndexes.has(currentSlideIndex)) {
+                currentSlideIndex = index;
+            }
+
+            lastSelectedSlideIndex = index;
+        }
+
+        function deleteSelectedSlides() {
+            if (isPlaying || isRecording || selectedSlideIndexes.size === 0) {
+                return;
+            }
+
+            const indexesToDelete = [...selectedSlideIndexes].sort((a, b) => b - a);
+            const nextIndexCandidate = Math.min(...selectedSlideIndexes);
+
+            stopOutroPreview();
+
+            indexesToDelete.forEach(index => {
+                slides.splice(index, 1);
+                slideDurations.splice(index, 1);
+                slideCinematicDurations.splice(index, 1);
+                slideTypes.splice(index, 1);
+                slideCustomTexts.splice(index, 1);
+            });
+
+            if (slides.length === 0) {
+                currentSlideIndex = 0;
+                selectedSlideIndexes.clear();
+                lastSelectedSlideIndex = null;
+            } else {
+                const nextIndex = Math.min(nextIndexCandidate, slides.length - 1);
+                selectSingleSlide(nextIndex);
+            }
+
+            rebuildSlideWordRanges();
+            syncSlideDurations();
+            buildTimeline(slides);
+            updateTimelineActive();
+            updateInspector();
+            maybePlaySelectedOutroPreview();
+        }
+
+        function stopOutroPreview() {
+            if (previewAnimationFrame) {
+                cancelAnimationFrame(previewAnimationFrame);
+                previewAnimationFrame = null;
+            }
+            previewSelectedSlideIndex = null;
+        }
+
+        function maybePlaySelectedOutroPreview() {
+            stopOutroPreview();
+
+            if (isPlaying || isRecording || getSlideType(currentSlideIndex) !== 'outro') {
+                drawFrame();
+                return;
+            }
+
+            previewSelectedSlideIndex = currentSlideIndex;
+            const previewDuration = Math.max(1000, getSlideSpeedValue(currentSlideIndex));
+            const startTime = performance.now();
+
+            function animatePreview(now) {
+                if (isPlaying || isRecording || previewSelectedSlideIndex !== currentSlideIndex || getSlideType(currentSlideIndex) !== 'outro') {
+                    stopOutroPreview();
+                    return;
+                }
+
+                const progress = Math.min(1, (now - startTime) / previewDuration);
+                drawFrame(1, progress);
+
+                if (progress < 1) {
+                    previewAnimationFrame = requestAnimationFrame(animatePreview);
+                } else {
+                    stopOutroPreview();
+                    drawFrame(1, 1);
+                }
+            }
+
+            previewAnimationFrame = requestAnimationFrame(animatePreview);
         }
 
         function getGlobalSpeedValue() {
@@ -1126,14 +1479,40 @@
             return getDefaultCinematicSpeedValue();
         }
 
+        function getTimelineSlideDurationValue(index) {
+            return animationMode.value === 'cinematic'
+                ? getCinematicSlideSpeedValue(index)
+                : getSlideSpeedValue(index);
+        }
+
+        function getDurationPalette(ratio) {
+            if (ratio <= 0.2) {
+                return { start: '#38bdf8', end: '#2563eb' };
+            }
+            if (ratio <= 0.4) {
+                return { start: '#22c55e', end: '#16a34a' };
+            }
+            if (ratio <= 0.6) {
+                return { start: '#facc15', end: '#f59e0b' };
+            }
+            if (ratio <= 0.8) {
+                return { start: '#fb923c', end: '#ea580c' };
+            }
+            return { start: '#f43f5e', end: '#be123c' };
+        }
+
         function syncSlideDurations() {
             slideDurations = slides.map((_, index) => Number.isFinite(slideDurations[index]) ? slideDurations[index] : null);
             slideCinematicDurations = slides.map((_, index) => Number.isFinite(slideCinematicDurations[index]) ? slideCinematicDurations[index] : null);
+            syncSlideMetadata();
             if (slides.length === 0) {
                 currentSlideIndex = 0;
+                selectedSlideIndexes.clear();
+                lastSelectedSlideIndex = null;
             } else if (currentSlideIndex >= slides.length) {
                 currentSlideIndex = slides.length - 1;
             }
+            syncSelectedSlides();
         }
 
         function updateInspector() {
@@ -1146,7 +1525,7 @@
                 slideInspectorPreview.textContent = 'Skriv text eller bygg slides för att se detaljer här.';
                 slideDurationInput.value = getGlobalSpeedValue();
                 slideDurationInput.disabled = true;
-                slideDurationMeta.textContent = 'Global timing används när inga slides finns.';
+                slideDurationMeta.textContent = 'Standardvaraktigheten visas när inga slides finns.';
                 slideCinematicDurationInput.value = getDefaultCinematicSpeedValue();
                 slideCinematicDurationInput.disabled = true;
                 slideCinematicDurationMeta.textContent = 'Cinematic-standard visas när cinematic är vald.';
@@ -1157,20 +1536,19 @@
                 return;
             }
 
-            const slideText = slides[currentSlideIndex].map(word => parseDisplayWord(word).text).join(' ');
+            const slideType = getSlideType(currentSlideIndex);
+            const slideText = getSlideText(currentSlideIndex);
             const customValue = slideDurations[currentSlideIndex];
             const globalSpeedValue = getGlobalSpeedValue();
-            const effectiveValue = Number.isFinite(customValue) ? Math.min(10000, Math.max(100, customValue)) : globalSpeedValue;
             const customCinematicValue = slideCinematicDurations[currentSlideIndex];
-            const effectiveCinematicValue = getCinematicSlideSpeedValue(currentSlideIndex);
 
             slideInspectorTitle.textContent = `Slide ${currentSlideIndex + 1} av ${slides.length}`;
             slideInspectorPreview.textContent = slideText || 'Tom slide';
             slideDurationInput.value = Number.isFinite(customValue) ? customValue : globalSpeedValue;
             slideDurationInput.disabled = isPlaying || isRecording;
             slideDurationMeta.textContent = Number.isFinite(customValue)
-                ? `Override aktiv. Global timing är ${globalSpeedValue} ms.`
-                : `Använder global timing på ${globalSpeedValue} ms.`;
+                ? `Override aktiv. Standardvaraktigheten är ${globalSpeedValue} ms.`
+                : `Använder standardvaraktigheten ${globalSpeedValue} ms.`;
             slideCinematicDurationInput.value = Number.isFinite(customCinematicValue) ? customCinematicValue : getDefaultCinematicSpeedValue();
             slideCinematicDurationInput.disabled = !isCinematic || isPlaying || isRecording;
             slideCinematicDurationMeta.textContent = Number.isFinite(customCinematicValue)
@@ -1179,7 +1557,9 @@
             
             // Animation info
             const animationValue = animationMode.value;
-            slideAnimationMeta.textContent = animationValue === 'standard' ? 'Standard' : '🎬 Cinematic';
+            slideAnimationMeta.textContent = slideType === 'outro'
+                ? 'Outro-animation'
+                : (animationValue === 'standard' ? 'Standard' : '🎬 Cinematic');
             
             // Transition info
             const transitionValue = transition.value;
@@ -1199,10 +1579,31 @@
         }
 
         function updateWordCount() {
+            const preservedSlides = slides
+                .map((slideWords, index) => ({
+                    words: [...slideWords],
+                    type: getSlideType(index),
+                    customText: slideCustomTexts[index] || '',
+                    duration: slideDurations[index],
+                    cinematicDuration: slideCinematicDurations[index]
+                }))
+                .filter(slide => slide.type !== 'standard');
             const slideData = getSlides();
             slides = slideData.slides;
-            slideWordRanges = slideData.ranges;
-            wordCount.textContent = slideData.totalWords;
+            slideTypes = slides.map(() => 'standard');
+            slideCustomTexts = slides.map(() => '');
+            slideDurations = slides.map((_, index) => Number.isFinite(slideDurations[index]) ? slideDurations[index] : null);
+            slideCinematicDurations = slides.map((_, index) => Number.isFinite(slideCinematicDurations[index]) ? slideCinematicDurations[index] : null);
+
+            preservedSlides.forEach(slide => {
+                slides.push(slide.words);
+                slideTypes.push(slide.type);
+                slideCustomTexts.push(slide.customText);
+                slideDurations.push(Number.isFinite(slide.duration) ? slide.duration : null);
+                slideCinematicDurations.push(Number.isFinite(slide.cinematicDuration) ? slide.cinematicDuration : null);
+            });
+
+            rebuildSlideWordRanges();
             syncSlideDurations();
             buildTimeline(slides);
             updateTimelineActive();
@@ -1211,8 +1612,15 @@
 
         function buildTimeline(slides) {
             timeline.innerHTML = '';
+            const maxDuration = slides.length > 0
+                ? Math.max(...slides.map((_, index) => getTimelineSlideDurationValue(index)))
+                : 1;
             
             slides.forEach((frameWords, index) => {
+                const timelineItem = document.createElement('div');
+                timelineItem.className = 'timeline-item';
+                timelineItem.dataset.index = index;
+
                 const slide = document.createElement('div');
                 slide.className = 'timeline-slide';
                 slide.dataset.index = index;
@@ -1223,33 +1631,69 @@
                 
                 const slideText = document.createElement('span');
                 slideText.className = 'slide-text';
-                slideText.textContent = frameWords.join(' ');
-                
+                const slideLabel = getSlideText(index) || 'Tom slide';
+                slideText.textContent = getSlideType(index) === 'outro'
+                    ? `OUTRO • ${slideLabel}`
+                    : slideLabel;
+
+                const durationValue = getTimelineSlideDurationValue(index);
+                const durationLabel = document.createElement('span');
+                durationLabel.className = 'slide-duration-label';
+                durationLabel.textContent = `${durationValue} ms`;
+
+                const durationTrack = document.createElement('div');
+                durationTrack.className = 'slide-duration-track';
+
+                const durationBar = document.createElement('div');
+                durationBar.className = 'slide-duration-bar';
+                const durationRatio = maxDuration > 0 ? durationValue / maxDuration : 0;
+                const palette = getDurationPalette(durationRatio);
+                durationBar.style.height = `${Math.max(10, durationRatio * 100)}%`;
+                durationBar.style.setProperty('--duration-color-start', palette.start);
+                durationBar.style.setProperty('--duration-color-end', palette.end);
+                durationTrack.appendChild(durationBar);
+
                 slide.appendChild(slideNumber);
                 slide.appendChild(slideText);
                 
-                slide.addEventListener('click', () => {
+                const durationLane = document.createElement('div');
+                durationLane.className = 'timeline-duration-lane';
+                durationLane.appendChild(durationLabel);
+                durationLane.appendChild(durationTrack);
+                
+                timelineItem.appendChild(slide);
+                timelineItem.appendChild(durationLane);
+
+                timelineItem.addEventListener('click', (event) => {
                     if (!isPlaying && !isRecording) {
-                        currentSlideIndex = index;
-                        drawFrame();
+                        if (event.shiftKey && lastSelectedSlideIndex !== null) {
+                            selectSlideRange(lastSelectedSlideIndex, index);
+                        } else if (event.metaKey || event.ctrlKey) {
+                            toggleSlideSelection(index);
+                        } else {
+                            selectSingleSlide(index);
+                        }
                         updateTimelineActive();
                         updateInspector();
+                        maybePlaySelectedOutroPreview();
                     }
                 });
                 
-                timeline.appendChild(slide);
+                timeline.appendChild(timelineItem);
             });
         }
 
         function updateTimelineActive() {
-            const slides = document.querySelectorAll('.timeline-slide');
-            slides.forEach(slide => {
-                const index = parseInt(slide.dataset.index);
+            const timelineItems = document.querySelectorAll('.timeline-item');
+            timelineItems.forEach(item => {
+                const index = parseInt(item.dataset.index);
+                const isSelected = selectedSlideIndexes.has(index);
+                item.classList.toggle('selected', isSelected);
                 if (index === currentSlideIndex) {
-                    slide.classList.add('active');
-                    slide.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                    item.classList.add('active');
+                    item.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
                 } else {
-                    slide.classList.remove('active');
+                    item.classList.remove('active');
                 }
             });
         }
@@ -1266,6 +1710,8 @@
 
             slideDurations[currentSlideIndex] = Math.min(10000, Math.max(100, parsedValue));
             slideDurationInput.value = slideDurations[currentSlideIndex];
+            buildTimeline(slides);
+            updateTimelineActive();
             updateInspector();
         });
 
@@ -1289,6 +1735,8 @@
 
             slideDurations[currentSlideIndex] = Math.min(10000, Math.max(100, parsedValue));
             slideDurationInput.value = slideDurations[currentSlideIndex];
+            buildTimeline(slides);
+            updateTimelineActive();
             updateInspector();
         });
 
@@ -1304,7 +1752,22 @@
 
             slideCinematicDurations[currentSlideIndex] = Math.min(15000, Math.max(100, parsedValue));
             slideCinematicDurationInput.value = slideCinematicDurations[currentSlideIndex];
+            buildTimeline(slides);
+            updateTimelineActive();
             updateInspector();
+        });
+
+        randomizeDurationsBtn.addEventListener('click', () => {
+            if (slides.length === 0 || isPlaying || isRecording) {
+                return;
+            }
+
+            const baseSpeed = getGlobalSpeedValue();
+            slideDurations = slides.map(() => getRandomizedSlideDuration(baseSpeed));
+            buildTimeline(slides);
+            updateTimelineActive();
+            updateInspector();
+            maybePlaySelectedOutroPreview();
         });
 
         slideTextInput.addEventListener('input', () => {
@@ -1314,18 +1777,27 @@
 
             const newText = slideTextInput.value.trim();
             const newWords = newText.split(/\s+/).filter(w => w.length > 0);
-            
-            if (newWords.length > 0) {
+
+            if (getSlideType(currentSlideIndex) === 'outro') {
+                slideCustomTexts[currentSlideIndex] = newText;
+                slides[currentSlideIndex] = newWords;
+            } else if (newWords.length > 0) {
                 slides[currentSlideIndex] = newWords;
                 slideWordRanges[currentSlideIndex].end = slideWordRanges[currentSlideIndex].start + newWords.length - 1;
             } else {
                 slides[currentSlideIndex] = [];
                 slideWordRanges[currentSlideIndex].end = slideWordRanges[currentSlideIndex].start - 1;
             }
-            
+
+            if (getSlideType(currentSlideIndex) === 'outro') {
+                slideWordRanges[currentSlideIndex].end = slideWordRanges[currentSlideIndex].start + newWords.length - 1;
+            }
+
+            rebuildSlideWordRanges();
             buildTimeline(slides);
             updateTimelineActive();
-            drawFrame();
+            updateInspector();
+            maybePlaySelectedOutroPreview();
         });
 
         duplicateSlideBtn.addEventListener('click', () => {
@@ -1351,26 +1823,46 @@
             // Copy duration settings
             slideDurations.splice(insertIndex, 0, newDuration);
             slideCinematicDurations.splice(insertIndex, 0, newCinematicDuration);
+            slideTypes.splice(insertIndex, 0, getSlideType(currentSlideIndex));
+            slideCustomTexts.splice(insertIndex, 0, slideCustomTexts[currentSlideIndex] || '');
             
-            // Recalculate word ranges for all slides
-            let totalWords = 0;
-            slideWordRanges = slides.map(slideWords => {
-                const start = totalWords + 1;
-                totalWords += slideWords.length;
-                return { start, end: totalWords };
-            });
-            
-            // Update word count
-            wordCount.textContent = totalWords;
+            rebuildSlideWordRanges();
             
             // Select the new slide
             currentSlideIndex = insertIndex;
+            selectedSlideIndexes = new Set([insertIndex]);
+            lastSelectedSlideIndex = insertIndex;
             
             // Rebuild timeline and update UI
             buildTimeline(slides);
             updateTimelineActive();
             updateInspector();
-            drawFrame();
+            maybePlaySelectedOutroPreview();
+        });
+
+        addOutroSlideBtn.addEventListener('click', () => {
+            if (isPlaying || isRecording) {
+                return;
+            }
+
+            const outroText = outroTextInput.value.trim();
+            const outroWords = outroText.split(/\s+/).filter(Boolean);
+            const insertIndex = slides.length;
+
+            slides.splice(insertIndex, 0, outroWords);
+            slideTypes.splice(insertIndex, 0, 'outro');
+            slideCustomTexts.splice(insertIndex, 0, outroText);
+            slideDurations.splice(insertIndex, 0, 9000);
+            slideCinematicDurations.splice(insertIndex, 0, 9000);
+
+            currentSlideIndex = insertIndex;
+            selectedSlideIndexes = new Set([insertIndex]);
+            lastSelectedSlideIndex = insertIndex;
+            rebuildSlideWordRanges();
+            buildTimeline(slides);
+            updateTimelineActive();
+            updateInspector();
+            maybePlaySelectedOutroPreview();
         });
 
         cinematicDefaultDuration.addEventListener('input', () => {
@@ -1395,6 +1887,24 @@
 
         textInput.addEventListener('input', updateWordCount);
         updateWordCount();
+        syncLayoutMetrics();
+        window.addEventListener('resize', () => {
+            syncLayoutMetrics();
+        });
+        document.addEventListener('keydown', (event) => {
+            if (event.key !== 'Delete') {
+                return;
+            }
+
+            const activeTag = document.activeElement?.tagName;
+            const isTyping = activeTag === 'INPUT' || activeTag === 'TEXTAREA' || document.activeElement?.isContentEditable;
+            if (isTyping) {
+                return;
+            }
+
+            event.preventDefault();
+            deleteSelectedSlides();
+        });
 
         function drawBackground() {
             if (bgType.value === 'solid') {
@@ -1490,6 +2000,26 @@
             return fontSize;
         }
 
+        function getTextMetrics(font, text) {
+            ctx.save();
+            ctx.font = font;
+            const metrics = ctx.measureText(text || ' ');
+            ctx.restore();
+            return metrics;
+        }
+
+        function getCenteredTextPosition(metrics, targetX, targetY) {
+            const ascent = metrics.actualBoundingBoxAscent || 0;
+            const descent = metrics.actualBoundingBoxDescent || 0;
+            const left = metrics.actualBoundingBoxLeft || 0;
+            const right = metrics.actualBoundingBoxRight || metrics.width || 0;
+
+            return {
+                x: targetX - ((right - left) / 2),
+                y: targetY + ((ascent - descent) / 2)
+            };
+        }
+
         function parseDisplayWord(rawWord) {
             const match = rawWord.match(/^\[\[(.+?)\]\]([.,!?;:]*)$/);
             if (!match) {
@@ -1505,7 +2035,122 @@
             };
         }
 
-        function drawFrame(transitionProg = 1) {
+        function getOutroView(progress) {
+            const width = 1920;
+            const height = 1080;
+
+            const fullView = { x: 0, y: 0, w: width, h: height };
+            const row1Y = 410;
+            const row2Y = 675;
+            const zoomW = 220;
+            const zoomH = 170;
+
+            const row1Start = { x: 250 - zoomW / 2, y: row1Y - zoomH / 2, w: zoomW, h: zoomH };
+            const row1End = { x: 1200 - zoomW / 2, y: row1Y - zoomH / 2, w: zoomW, h: zoomH };
+            const row2Start = { x: 355 - zoomW / 2, y: row2Y - zoomH / 2, w: zoomW, h: zoomH };
+            const row2End = { x: 1565 - zoomW / 2, y: row2Y - zoomH / 2, w: zoomW, h: zoomH };
+            const bridge1 = { x: row1End.x, y: row1End.y, w: zoomW, h: zoomH };
+            const bridge2 = { x: row2Start.x, y: row2Start.y, w: zoomW, h: zoomH };
+
+            const segments = [
+                { start: 0, end: 0.24, from: row1Start, to: row1End },
+                { start: 0.24, end: 0.34, from: bridge1, to: bridge2 },
+                { start: 0.34, end: 0.62, from: row2Start, to: row2End },
+                { start: 0.62, end: 1, from: row2End, to: fullView }
+            ];
+
+            const easedProgress = Math.min(1, Math.max(0, progress));
+            let current = fullView;
+
+            for (const segment of segments) {
+                if (easedProgress >= segment.start && easedProgress <= segment.end) {
+                    const localT = (easedProgress - segment.start) / (segment.end - segment.start);
+                    const eased = localT < 0.5
+                        ? 4 * localT * localT * localT
+                        : 1 - Math.pow(-2 * localT + 2, 3) / 2;
+                    current = {
+                        x: segment.from.x + (segment.to.x - segment.from.x) * eased,
+                        y: segment.from.y + (segment.to.y - segment.from.y) * eased,
+                        w: segment.from.w + (segment.to.w - segment.from.w) * eased,
+                        h: segment.from.h + (segment.to.h - segment.from.h) * eased
+                    };
+                    break;
+                }
+
+                if (easedProgress > segment.end) {
+                    current = segment.to;
+                }
+            }
+
+            return current;
+        }
+
+        function getOutroFontSize(text, maxSize = 220) {
+            let fontSize = maxSize;
+
+            while (fontSize > 64) {
+                ctx.font = `800 ${fontSize}px Arial, Helvetica, sans-serif`;
+                if (ctx.measureText(text || ' ').width <= 1500) {
+                    break;
+                }
+                fontSize -= 4;
+            }
+
+            return fontSize;
+        }
+
+        function drawOutroFrame(progress) {
+            const outroText = getSlideText(currentSlideIndex) || '';
+            const [line1, line2] = splitOutroTextIntoLines(outroText);
+            const view = getOutroView(progress);
+            const scaleX = canvas.width / view.w;
+            const scaleY = canvas.height / view.h;
+
+            ctx.save();
+            ctx.fillStyle = '#b30000';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.scale(scaleX, scaleY);
+            ctx.translate(-view.x, -view.y);
+
+            ctx.fillStyle = '#b30000';
+            ctx.fillRect(0, 0, 1920, 1080);
+            ctx.fillStyle = '#ffffff';
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'alphabetic';
+            ctx.shadowColor = 'transparent';
+            ctx.shadowBlur = 0;
+            ctx.shadowOffsetX = 0;
+            ctx.shadowOffsetY = 0;
+
+            const line1Font = `800 ${getOutroFontSize(line1)}px Arial, Helvetica, sans-serif`;
+            const line2Font = `800 ${getOutroFontSize(line2)}px Arial, Helvetica, sans-serif`;
+            const line1Metrics = getTextMetrics(line1Font, line1);
+            const line2Metrics = getTextMetrics(line2Font, line2);
+            const line1Height = (line1Metrics.actualBoundingBoxAscent || 0) + (line1Metrics.actualBoundingBoxDescent || 0);
+            const line2Height = (line2Metrics.actualBoundingBoxAscent || 0) + (line2Metrics.actualBoundingBoxDescent || 0);
+            const lineGap = line1 && line2 ? 110 : 0;
+            const blockHeight = line1Height + line2Height + lineGap;
+            let nextCenterY = 540 - (blockHeight / 2);
+
+            if (line1) {
+                nextCenterY += line1Height / 2;
+                ctx.font = line1Font;
+                const { x, y } = getCenteredTextPosition(line1Metrics, 960, nextCenterY);
+                ctx.fillText(line1, x, y);
+                nextCenterY += line1Height / 2 + lineGap;
+            }
+
+            if (line2) {
+                nextCenterY += line2Height / 2;
+                ctx.font = line2Font;
+                const { x, y } = getCenteredTextPosition(line2Metrics, 960, nextCenterY);
+                ctx.fillText(line2, x, y);
+            }
+
+            ctx.restore();
+        }
+
+        function drawFrame(transitionProg = 1, slideProg = 1) {
             drawBackground();
 
             if (slides.length === 0) {
@@ -1513,6 +2158,11 @@
             }
 
             if (currentSlideIndex >= slides.length) {
+                return;
+            }
+
+            if (getSlideType(currentSlideIndex) === 'outro') {
+                drawOutroFrame(slideProg);
                 return;
             }
 
@@ -1528,10 +2178,13 @@
 
             // Text styling
             const fontSize = getFittedFontSize(text, 120);
+            const font = `bold ${fontSize}px '${fontFamily.value}', sans-serif`;
+            const textMetrics = getTextMetrics(font, text);
+            const centeredPosition = getCenteredTextPosition(textMetrics, canvas.width / 2, canvas.height / 2);
             ctx.fillStyle = textColor.value;
-            ctx.font = `bold ${fontSize}px '${fontFamily.value}', sans-serif`;
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
+            ctx.font = font;
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'alphabetic';
 
             // Add configurable text shadow
             const shadowStrength = Math.min(100, Math.max(0, parseInt(textShadowStrength.value, 10) || 0));
@@ -1543,7 +2196,7 @@
             ctx.shadowOffsetY = shadowStrength > 0 ? 5 : 0;
 
             // Draw text centered with transition
-            applyTransitionEffect(transitionProg, text, canvas.width / 2, canvas.height / 2, fontSize);
+            applyTransitionEffect(transitionProg, text, centeredPosition.x, centeredPosition.y, fontSize);
 
             // Reset shadow
             ctx.shadowColor = 'transparent';
@@ -1559,6 +2212,9 @@
             const centerY = canvas.height / 2;
             const text = parsedWords.map(word => word.text).join(' ');
             const fontSize = getFittedFontSize(text, 80, '700');
+            const font = `700 ${fontSize}px '${fontFamily.value}', sans-serif`;
+            const fullTextMetrics = getTextMetrics(font, text);
+            const centeredTextPosition = getCenteredTextPosition(fullTextMetrics, centerX, centerY);
             
             ctx.save();
             
@@ -1569,9 +2225,9 @@
             ctx.translate(-centerX, -centerY);
 
             // Set font once
-            ctx.font = `700 ${fontSize}px '${fontFamily.value}', sans-serif`;
+            ctx.font = font;
             ctx.textAlign = 'left';
-            ctx.textBaseline = 'middle';
+            ctx.textBaseline = 'alphabetic';
             
             // Measure full text once
             const fullTextWidth = ctx.measureText(text).width;
@@ -1581,7 +2237,7 @@
             
             ctx.save();
             ctx.beginPath();
-            ctx.rect(centerX - fullTextWidth / 2, centerY - fontSize, revealWidth, fontSize * 2.5);
+            ctx.rect(centeredTextPosition.x, centeredTextPosition.y - (fullTextMetrics.actualBoundingBoxAscent || fontSize), revealWidth, (fullTextMetrics.actualBoundingBoxAscent || fontSize) + (fullTextMetrics.actualBoundingBoxDescent || fontSize * 0.3));
             ctx.clip();
 
             // Split text into words and check for highlights
@@ -1596,7 +2252,7 @@
             }));
             
             const totalWidth = wordWidths.reduce((sum, w) => sum + w.width, 0) + (wordWidths.length - 1) * spaceWidth;
-            let currentX = centerX - totalWidth / 2;
+            let currentX = centeredTextPosition.x;
             
             // Check if we're past the highlight point
             const isHighlighted = progress > 0.65;
@@ -1626,7 +2282,7 @@
                     ctx.shadowBlur = 0;
                 }
                 
-                ctx.fillText(word, currentX, centerY);
+                ctx.fillText(word, currentX, centeredTextPosition.y);
                 currentX += width + spaceWidth;
             }
             
@@ -1674,10 +2330,9 @@
             const transType = transition.value;
             const isCinematic = animationMode.value === 'cinematic';
             const slideBaseSpeed = getSlideSpeedValue(currentSlideIndex);
-            const hasCustomDuration = Number.isFinite(slideDurations[currentSlideIndex]);
             const currentSpeed = isCinematic
                 ? getCinematicSlideSpeedValue(currentSlideIndex)
-                : (hasCustomDuration ? slideBaseSpeed : getVariedSpeed(slideBaseSpeed));
+                : slideBaseSpeed;
             
             const slideDuration = currentSpeed;
             currentSlideDuration = slideDuration * (isCinematic ? 0.55 : 0.3);
@@ -1694,9 +2349,9 @@
                 if (elapsed < currentSlideDuration) {
                     transitionProgress = elapsed / currentSlideDuration;
                     const eased = 1 - Math.pow(1 - transitionProgress, 3);
-                    drawFrame(eased);
+                    drawFrame(eased, progress);
                 } else {
-                    drawFrame(1); // Hold final state
+                    drawFrame(1, progress); // Hold final state
                 }
 
                 if (progress < 1) {
@@ -1734,6 +2389,7 @@
             }
 
             isPlaying = true;
+            stopOutroPreview();
             currentSlideIndex = 0;
             transitionProgress = 0;
             playBtn.disabled = true;
@@ -1756,6 +2412,7 @@
             if (animationFrame) {
                 cancelAnimationFrame(animationFrame);
             }
+            stopOutroPreview();
             
             // Stop media recorder if recording
             if (mediaRecorder && mediaRecorder.state !== 'inactive') {
@@ -1780,10 +2437,9 @@
             const transType = transition.value;
             const isCinematic = animationMode.value === 'cinematic';
             const slideBaseSpeed = getSlideSpeedValue(currentSlideIndex);
-            const hasCustomDuration = Number.isFinite(slideDurations[currentSlideIndex]);
             const currentSpeed = isCinematic
                 ? getCinematicSlideSpeedValue(currentSlideIndex)
-                : (hasCustomDuration ? slideBaseSpeed : getVariedSpeed(slideBaseSpeed));
+                : slideBaseSpeed;
             
             const slideDuration = currentSpeed;
             currentSlideDuration = slideDuration * (isCinematic ? 0.55 : 0.3);
@@ -1800,9 +2456,9 @@
                 if (elapsed < currentSlideDuration) {
                     transitionProgress = elapsed / currentSlideDuration;
                     const eased = 1 - Math.pow(1 - transitionProgress, 3);
-                    drawFrame(eased);
+                    drawFrame(eased, progress);
                 } else {
-                    drawFrame(1); // Hold final state
+                    drawFrame(1, progress); // Hold final state
                 }
 
                 if (progress < 1) {
@@ -1835,6 +2491,8 @@
 
         function startRecording() {
             if (isRecording) return;
+
+            stopOutroPreview();
 
             const stream = canvas.captureStream(30);
             recordedChunks = [];
@@ -1925,6 +2583,7 @@
 
         // Initialize background type and preset visibility
         bgType.dispatchEvent(new Event('change'));
+        syncLayoutMetrics();
 
         // Initial draw
         drawFrame();
