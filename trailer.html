@@ -460,6 +460,118 @@
             margin-top: 5px;
         }
 
+        .bg-image-editor {
+            align-items: stretch;
+        }
+
+        .bg-image-editor label {
+            gap: 10px;
+        }
+
+        .bg-image-editor-copy {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: none;
+            letter-spacing: 0;
+            color: #7a7a7a;
+        }
+
+        .bg-image-editor-viewport {
+            position: relative;
+            width: 240px;
+            aspect-ratio: 16 / 9;
+            overflow: hidden;
+            border-radius: 12px;
+            border: 1px solid #d7dce6;
+            background: linear-gradient(135deg, #edf2f7 0%, #e2e8f0 100%);
+            cursor: grab;
+            user-select: none;
+            touch-action: none;
+            box-shadow: inset 0 0 0 1px rgba(255,255,255,0.55);
+        }
+
+        .bg-image-editor-viewport.dragging {
+            cursor: grabbing;
+        }
+
+        .bg-image-editor-image {
+            position: absolute;
+            max-width: none;
+            max-height: none;
+            pointer-events: none;
+        }
+
+        .bg-image-editor-overlay {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            border: 1px solid rgba(255,255,255,0.55);
+            background:
+                linear-gradient(to right, rgba(255,255,255,0.16) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255,255,255,0.16) 1px, transparent 1px);
+            background-size: 33.333% 100%, 100% 33.333%;
+        }
+
+        .bg-image-editor-empty {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 18px;
+            text-align: center;
+            font-size: 12px;
+            color: #6b7280;
+            pointer-events: none;
+        }
+
+        .bg-image-zoom-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .bg-image-zoom-row input[type="range"] {
+            width: 160px;
+        }
+
+        .text-position-editor {
+            align-items: stretch;
+        }
+
+        .text-position-editor-marker {
+            position: absolute;
+            width: 22px;
+            height: 22px;
+            margin-left: -11px;
+            margin-top: -11px;
+            border-radius: 50%;
+            border: 2px solid rgba(255,255,255,0.95);
+            background: rgba(102,126,234,0.85);
+            box-shadow: 0 0 0 4px rgba(102,126,234,0.2);
+            pointer-events: none;
+        }
+
+        .text-position-editor-marker::before,
+        .text-position-editor-marker::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            background: rgba(255,255,255,0.92);
+            transform: translate(-50%, -50%);
+        }
+
+        .text-position-editor-marker::before {
+            width: 2px;
+            height: 30px;
+        }
+
+        .text-position-editor-marker::after {
+            width: 30px;
+            height: 2px;
+        }
+
         /* Timeline */
         .timeline-container {
             position: fixed;
@@ -806,6 +918,47 @@
             </label>
         </div>
 
+        <div class="control-group image-animation-input" style="display: none;">
+            <label>
+                <span class="section-title">Bildanimation</span>
+                Effekt
+            </label>
+            <select id="bgImageAnimation">
+                <option value="none">Ingen</option>
+                <option value="slow-zoom">Långsam zoom</option>
+                <option value="pulse-zoom">Pulserande zoom</option>
+            </select>
+        </div>
+
+        <div class="control-group bg-image-editor" style="display: none;">
+            <label>
+                <span class="section-title">Bildposition</span>
+                <span class="bg-image-editor-copy">Dra i rutan för att välja utsnitt och justera startzoom.</span>
+                <div class="bg-image-editor-viewport" id="bgImageEditorViewport">
+                    <img class="bg-image-editor-image" id="bgImageEditorImage" alt="">
+                    <div class="bg-image-editor-overlay"></div>
+                    <div class="bg-image-editor-empty" id="bgImageEditorEmpty">Välj en bakgrundsbild för att placera utsnittet grafiskt.</div>
+                </div>
+                <div class="bg-image-zoom-row">
+                    <input type="range" id="bgImageZoom" min="100" max="220" step="1" value="100">
+                    <span class="value-display" id="bgImageZoomValue">100%</span>
+                </div>
+            </label>
+        </div>
+
+        <div class="control-group text-position-editor" style="display: none;">
+            <label>
+                <span class="section-title">Textposition</span>
+                <span class="bg-image-editor-copy">Dra markören dit textens centrum ska ligga ovanpå bilden.</span>
+                <div class="bg-image-editor-viewport" id="textPositionEditorViewport">
+                    <img class="bg-image-editor-image" id="textPositionEditorImage" alt="">
+                    <div class="bg-image-editor-overlay"></div>
+                    <div class="text-position-editor-marker" id="textPositionEditorMarker"></div>
+                    <div class="bg-image-editor-empty" id="textPositionEditorEmpty">Välj en bakgrundsbild för att placera texten grafiskt.</div>
+                </div>
+            </label>
+        </div>
+
         <div class="control-group">
             <label>
                 <span class="section-title">Utseende</span>
@@ -844,6 +997,17 @@
                 <option value="Playfair Display">Playfair Display (Elegant)</option>
                 <option value="Roboto Condensed">Roboto Condensed</option>
             </select>
+        </div>
+
+        <div class="control-group">
+            <label>
+                <span class="section-title">Typsnitt</span>
+                Storlek
+            </label>
+            <div class="bg-image-zoom-row">
+                <input type="range" id="textScale" min="50" max="200" step="1" value="100">
+                <span class="value-display" id="textScaleValue">100%</span>
+            </div>
         </div>
 
         <div class="control-group">
@@ -993,11 +1157,23 @@ Poddcast</textarea>
         const color1 = document.getElementById('color1');
         const color2 = document.getElementById('color2');
         const bgImage = document.getElementById('bgImage');
+        const bgImageAnimation = document.getElementById('bgImageAnimation');
+        const bgImageZoom = document.getElementById('bgImageZoom');
+        const bgImageZoomValue = document.getElementById('bgImageZoomValue');
+        const bgImageEditorViewport = document.getElementById('bgImageEditorViewport');
+        const bgImageEditorImage = document.getElementById('bgImageEditorImage');
+        const bgImageEditorEmpty = document.getElementById('bgImageEditorEmpty');
+        const textPositionEditorViewport = document.getElementById('textPositionEditorViewport');
+        const textPositionEditorImage = document.getElementById('textPositionEditorImage');
+        const textPositionEditorMarker = document.getElementById('textPositionEditorMarker');
+        const textPositionEditorEmpty = document.getElementById('textPositionEditorEmpty');
         const fileName = document.getElementById('fileName');
         const textColor = document.getElementById('textColor');
         const textShadowColor = document.getElementById('textShadowColor');
         const textShadowStrength = document.getElementById('textShadowStrength');
         const fontFamily = document.getElementById('fontFamily');
+        const textScale = document.getElementById('textScale');
+        const textScaleValue = document.getElementById('textScaleValue');
         const transition = document.getElementById('transition');
         const animationMode = document.getElementById('animationMode');
         const speed = document.getElementById('speed');
@@ -1048,12 +1224,23 @@ Poddcast</textarea>
         let previewSelectedSlideIndex = null;
         let slideStartTime = 0;
         let currentSlideDuration = 0;
+        let bgImageBaseZoom = 1;
+        let bgImagePositionX = 0;
+        let bgImagePositionY = 0;
+        let bgImageDragState = null;
+        let textPositionX = 0;
+        let textPositionY = 0;
+        let textPositionDragState = null;
 
         // Show/hide inputs based on background type
         bgType.addEventListener('change', () => {
             const bgTypeValue = bgType.value;
             const color1Group = document.getElementById('color1Group');
             const color2Group = document.getElementById('color2Group');
+            const imageInputGroup = document.querySelector('.image-input');
+            const imageAnimationGroup = document.querySelector('.image-animation-input');
+            const imageEditorGroup = document.querySelector('.bg-image-editor');
+            const textPositionGroup = document.querySelector('.text-position-editor');
             
             if (bgTypeValue === 'solid') {
                 // Only show color1 for solid background
@@ -1069,8 +1256,13 @@ Poddcast</textarea>
                 color2Group.style.display = 'none';
             }
             
-            document.querySelector('.image-input').style.display = bgTypeValue === 'image' ? 'flex' : 'none';
+            imageInputGroup.style.display = bgTypeValue === 'image' ? 'flex' : 'none';
+            imageAnimationGroup.style.display = bgTypeValue === 'image' ? 'flex' : 'none';
+            imageEditorGroup.style.display = bgTypeValue === 'image' ? 'flex' : 'none';
+            textPositionGroup.style.display = bgTypeValue === 'image' ? 'flex' : 'none';
             syncLayoutMetrics();
+            renderBackgroundImageEditor();
+            renderTextPositionEditor();
             drawFrame();
         });
 
@@ -1095,12 +1287,111 @@ Poddcast</textarea>
                     const img = new Image();
                     img.onload = () => {
                         loadedBgImage = img;
+                        bgImageBaseZoom = 1;
+                        bgImagePositionX = 0;
+                        bgImagePositionY = 0;
+                        textPositionX = 0;
+                        textPositionY = 0;
+                        bgImageZoom.value = '100';
+                        updateBackgroundZoomValue();
+                        renderBackgroundImageEditor();
+                        renderTextPositionEditor();
                         drawFrame();
                     };
                     img.src = event.target.result;
                 };
                 reader.readAsDataURL(file);
             }
+        });
+
+        bgImageZoom.addEventListener('input', () => {
+            const nextValue = Math.min(220, Math.max(100, parseInt(bgImageZoom.value, 10) || 100));
+            bgImageZoom.value = `${nextValue}`;
+            bgImageBaseZoom = nextValue / 100;
+            updateBackgroundZoomValue();
+            renderBackgroundImageEditor();
+            renderTextPositionEditor();
+            drawFrame();
+        });
+
+        textScale.addEventListener('input', () => {
+            const nextValue = Math.min(200, Math.max(50, parseInt(textScale.value, 10) || 100));
+            textScale.value = `${nextValue}`;
+            updateTextScaleValue();
+            drawFrame();
+        });
+
+        bgImageEditorViewport.addEventListener('pointerdown', (event) => {
+            if (!loadedBgImage) {
+                return;
+            }
+
+            bgImageDragState = {
+                startX: event.clientX,
+                startY: event.clientY,
+                startPosX: bgImagePositionX,
+                startPosY: bgImagePositionY
+            };
+
+            bgImageEditorViewport.classList.add('dragging');
+            bgImageEditorViewport.setPointerCapture(event.pointerId);
+        });
+
+        bgImageEditorViewport.addEventListener('pointermove', (event) => {
+            if (!bgImageDragState || !loadedBgImage) {
+                return;
+            }
+
+            const placement = getBackgroundImagePlacement(
+                bgImageEditorViewport.clientWidth || 240,
+                bgImageEditorViewport.clientHeight || 135,
+                0,
+                false
+            );
+            const maxOffsetX = placement.maxOffsetX || 1;
+            const maxOffsetY = placement.maxOffsetY || 1;
+            const deltaX = event.clientX - bgImageDragState.startX;
+            const deltaY = event.clientY - bgImageDragState.startY;
+
+            bgImagePositionX = clamp(bgImageDragState.startPosX + (deltaX / maxOffsetX), -1, 1);
+            bgImagePositionY = clamp(bgImageDragState.startPosY + (deltaY / maxOffsetY), -1, 1);
+
+            renderBackgroundImageEditor();
+            renderTextPositionEditor();
+            drawFrame();
+        });
+
+        ['pointerup', 'pointercancel', 'lostpointercapture'].forEach((eventName) => {
+            bgImageEditorViewport.addEventListener(eventName, () => {
+                bgImageDragState = null;
+                bgImageEditorViewport.classList.remove('dragging');
+            });
+        });
+
+        textPositionEditorViewport.addEventListener('pointerdown', (event) => {
+            if (!loadedBgImage) {
+                return;
+            }
+
+            textPositionDragState = true;
+            textPositionEditorViewport.classList.add('dragging');
+            textPositionEditorViewport.setPointerCapture(event.pointerId);
+            updateTextPositionFromPointer(event);
+        });
+
+        textPositionEditorViewport.addEventListener('pointermove', (event) => {
+            if (!textPositionDragState || !loadedBgImage) {
+                return;
+            }
+
+            updateTextPositionFromPointer(event);
+        });
+
+        ['pointerup', 'pointercancel', 'lostpointercapture'].forEach((eventName) => {
+            textPositionEditorViewport.addEventListener(eventName, () => {
+                textPositionDragState = null;
+                textPositionEditorViewport.classList.remove('dragging');
+            });
         });
 
         speed.addEventListener('input', () => {
@@ -1166,6 +1457,34 @@ Poddcast</textarea>
             } : { r: 0, g: 0, b: 0 };
         }
 
+        function clamp(value, min, max) {
+            return Math.min(max, Math.max(min, value));
+        }
+
+        function updateBackgroundZoomValue() {
+            bgImageZoomValue.textContent = `${Math.round(bgImageBaseZoom * 100)}%`;
+        }
+
+        function getTextScaleValue() {
+            return Math.min(2, Math.max(0.5, (parseInt(textScale.value, 10) || 100) / 100));
+        }
+
+        function updateTextScaleValue() {
+            textScaleValue.textContent = `${Math.round(getTextScaleValue() * 100)}%`;
+        }
+
+        function updateTextPositionFromPointer(event) {
+            const rect = textPositionEditorViewport.getBoundingClientRect();
+            const localX = clamp(event.clientX - rect.left, 0, rect.width);
+            const localY = clamp(event.clientY - rect.top, 0, rect.height);
+
+            textPositionX = ((localX / rect.width) * 2) - 1;
+            textPositionY = ((localY / rect.height) * 2) - 1;
+
+            renderTextPositionEditor();
+            drawFrame();
+        }
+
         wordsPerFrame.addEventListener('input', () => {
             const parsedValue = parseInt(wordsPerFrame.value, 10);
             const safeValue = Number.isNaN(parsedValue) ? 1 : Math.min(20, Math.max(1, parsedValue));
@@ -1174,7 +1493,7 @@ Poddcast</textarea>
             drawFrame();
         });
 
-        [color1, color2, textColor, textShadowColor, fontFamily, transition, animationMode, highlightWordsInput].forEach(control => {
+        [color1, color2, textColor, textShadowColor, fontFamily, transition, animationMode, highlightWordsInput, bgImageAnimation, textScale].forEach(control => {
             control.addEventListener('input', () => {
                 drawFrame();
             });
@@ -1887,9 +2206,13 @@ Poddcast</textarea>
 
         textInput.addEventListener('input', updateWordCount);
         updateWordCount();
+        updateBackgroundZoomValue();
+        updateTextScaleValue();
         syncLayoutMetrics();
         window.addEventListener('resize', () => {
             syncLayoutMetrics();
+            renderBackgroundImageEditor();
+            renderTextPositionEditor();
         });
         document.addEventListener('keydown', (event) => {
             if (event.key !== 'Delete') {
@@ -1906,7 +2229,126 @@ Poddcast</textarea>
             deleteSelectedSlides();
         });
 
-        function drawBackground() {
+        function getAnimatedBackgroundProgress(slideProg) {
+            const normalizedProgress = Math.min(1, Math.max(0, slideProg || 0));
+            return isPlaying || isRecording || previewSelectedSlideIndex === currentSlideIndex
+                ? normalizedProgress
+                : 0;
+        }
+
+        function getBackgroundAnimationScale(progress) {
+            const animationType = bgImageAnimation.value;
+            const safeProgress = getAnimatedBackgroundProgress(progress);
+            const pulseScale = 1 + Math.sin(safeProgress * Math.PI * 0.75) * 0.015;
+
+            return animationType === 'slow-zoom'
+                ? 1 + safeProgress * 0.04
+                : animationType === 'pulse-zoom'
+                    ? pulseScale
+                    : 1;
+        }
+
+        function getBackgroundImagePlacement(targetWidth, targetHeight, progress = 0, includeAnimation = true) {
+            if (!loadedBgImage) {
+                return null;
+            }
+
+            const animationScale = includeAnimation ? getBackgroundAnimationScale(progress) : 1;
+            const scale = Math.max(
+                targetWidth / loadedBgImage.width,
+                targetHeight / loadedBgImage.height
+            ) * bgImageBaseZoom * animationScale;
+            const drawWidth = loadedBgImage.width * scale;
+            const drawHeight = loadedBgImage.height * scale;
+            const maxOffsetX = Math.max(0, (drawWidth - targetWidth) / 2);
+            const maxOffsetY = Math.max(0, (drawHeight - targetHeight) / 2);
+
+            return {
+                drawWidth,
+                drawHeight,
+                x: (targetWidth - drawWidth) / 2 + (bgImagePositionX * maxOffsetX),
+                y: (targetHeight - drawHeight) / 2 + (bgImagePositionY * maxOffsetY),
+                maxOffsetX,
+                maxOffsetY
+            };
+        }
+
+        function renderBackgroundImageEditor() {
+            if (!loadedBgImage) {
+                bgImageEditorImage.style.display = 'none';
+                bgImageEditorEmpty.style.display = 'flex';
+                return;
+            }
+
+            const placement = getBackgroundImagePlacement(
+                bgImageEditorViewport.clientWidth || 240,
+                bgImageEditorViewport.clientHeight || 135,
+                0,
+                false
+            );
+
+            bgImageEditorImage.src = loadedBgImage.src;
+            bgImageEditorImage.style.display = 'block';
+            bgImageEditorImage.style.width = `${placement.drawWidth}px`;
+            bgImageEditorImage.style.height = `${placement.drawHeight}px`;
+            bgImageEditorImage.style.left = `${placement.x}px`;
+            bgImageEditorImage.style.top = `${placement.y}px`;
+            bgImageEditorEmpty.style.display = 'none';
+        }
+
+        function renderTextPositionEditor() {
+            if (!loadedBgImage) {
+                textPositionEditorImage.style.display = 'none';
+                textPositionEditorMarker.style.display = 'none';
+                textPositionEditorEmpty.style.display = 'flex';
+                return;
+            }
+
+            const viewportWidth = textPositionEditorViewport.clientWidth || 240;
+            const viewportHeight = textPositionEditorViewport.clientHeight || 135;
+            const placement = getBackgroundImagePlacement(viewportWidth, viewportHeight, 0, false);
+
+            textPositionEditorImage.src = loadedBgImage.src;
+            textPositionEditorImage.style.display = 'block';
+            textPositionEditorImage.style.width = `${placement.drawWidth}px`;
+            textPositionEditorImage.style.height = `${placement.drawHeight}px`;
+            textPositionEditorImage.style.left = `${placement.x}px`;
+            textPositionEditorImage.style.top = `${placement.y}px`;
+            textPositionEditorMarker.style.display = 'block';
+            textPositionEditorMarker.style.left = `${((textPositionX + 1) / 2) * viewportWidth}px`;
+            textPositionEditorMarker.style.top = `${((textPositionY + 1) / 2) * viewportHeight}px`;
+            textPositionEditorEmpty.style.display = 'none';
+        }
+
+        function getTextAnchorPoint() {
+            if (bgType.value !== 'image' || !loadedBgImage) {
+                return {
+                    x: canvas.width / 2,
+                    y: canvas.height / 2
+                };
+            }
+
+            return {
+                x: ((textPositionX + 1) / 2) * canvas.width,
+                y: ((textPositionY + 1) / 2) * canvas.height
+            };
+        }
+
+        function drawAnimatedImageBackground(progress) {
+            const placement = getBackgroundImagePlacement(canvas.width, canvas.height, progress, true);
+
+            if (!placement) {
+                return;
+            }
+
+            ctx.drawImage(loadedBgImage, placement.x, placement.y, placement.drawWidth, placement.drawHeight);
+
+            // Add dark overlay for better text readability
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+
+        function drawBackground(slideProg = 0) {
             if (bgType.value === 'solid') {
                 ctx.fillStyle = color1.value;
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -1917,14 +2359,7 @@ Poddcast</textarea>
                 ctx.fillStyle = gradient;
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
             } else if (bgType.value === 'image' && loadedBgImage) {
-                const scale = Math.max(canvas.width / loadedBgImage.width, canvas.height / loadedBgImage.height);
-                const x = (canvas.width - loadedBgImage.width * scale) / 2;
-                const y = (canvas.height - loadedBgImage.height * scale) / 2;
-                ctx.drawImage(loadedBgImage, x, y, loadedBgImage.width * scale, loadedBgImage.height * scale);
-                
-                // Add dark overlay for better text readability
-                ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                drawAnimatedImageBackground(slideProg);
             } else {
                 const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
                 gradient.addColorStop(0, '#0a0a0a');
@@ -2086,7 +2521,7 @@ Poddcast</textarea>
         }
 
         function getOutroFontSize(text, maxSize = 220) {
-            let fontSize = maxSize;
+            let fontSize = Math.max(64, maxSize * getTextScaleValue());
 
             while (fontSize > 64) {
                 ctx.font = `800 ${fontSize}px Arial, Helvetica, sans-serif`;
@@ -2146,7 +2581,7 @@ Poddcast</textarea>
         }
 
         function drawFrame(transitionProg = 1, slideProg = 1) {
-            drawBackground();
+            drawBackground(slideProg);
 
             if (slides.length === 0) {
                 updateWordCount();
@@ -2172,10 +2607,11 @@ Poddcast</textarea>
             }
 
             // Text styling
-            const fontSize = getFittedFontSize(text, 120);
+            const fontSize = getFittedFontSize(text, 120 * getTextScaleValue());
             const font = `bold ${fontSize}px '${fontFamily.value}', sans-serif`;
             const textMetrics = getTextMetrics(font, text);
-            const centeredPosition = getCenteredTextPosition(textMetrics, canvas.width / 2, canvas.height / 2);
+            const textAnchorPoint = getTextAnchorPoint();
+            const centeredPosition = getCenteredTextPosition(textMetrics, textAnchorPoint.x, textAnchorPoint.y);
             ctx.fillStyle = textColor.value;
             ctx.font = font;
             ctx.textAlign = 'left';
@@ -2203,10 +2639,9 @@ Poddcast</textarea>
         }
 
         function drawCinematicFrame(parsedWords, progress) {
-            const centerX = canvas.width / 2;
-            const centerY = canvas.height / 2;
+            const { x: centerX, y: centerY } = getTextAnchorPoint();
             const text = parsedWords.map(word => word.text).join(' ');
-            const fontSize = getFittedFontSize(text, 80, '700');
+            const fontSize = getFittedFontSize(text, 80 * getTextScaleValue(), '700');
             const font = `700 ${fontSize}px '${fontFamily.value}', sans-serif`;
             const fullTextMetrics = getTextMetrics(font, text);
             const centeredTextPosition = getCenteredTextPosition(fullTextMetrics, centerX, centerY);
@@ -2578,6 +3013,8 @@ Poddcast</textarea>
 
         // Initialize background type and preset visibility
         bgType.dispatchEvent(new Event('change'));
+        renderBackgroundImageEditor();
+        renderTextPositionEditor();
         syncLayoutMetrics();
 
         // Initial draw
