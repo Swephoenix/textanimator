@@ -531,6 +531,24 @@
             gap: 10px;
         }
 
+        .number-range-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .number-range-row input[type="number"] {
+            width: 72px;
+        }
+
+        .number-range-row span {
+            font-size: 12px;
+            font-weight: 700;
+            color: #667;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+        }
+
         .bg-image-zoom-row input[type="range"] {
             width: 160px;
         }
@@ -1093,6 +1111,19 @@
 
         <div class="control-group">
             <label>
+                <span class="section-title">Slides</span>
+                Slumpa ord per slide
+            </label>
+            <div class="number-range-row">
+                <input type="number" id="randomWordsMin" min="1" max="20" value="1" step="1">
+                <span>till</span>
+                <input type="number" id="randomWordsMax" min="1" max="20" value="4" step="1">
+            </div>
+            <button class="btn btn-primary" id="randomizeWordsBtn" type="button">Slumpa ord per slide</button>
+        </div>
+
+        <div class="control-group">
+            <label>
                 <span class="section-title">Visning</span>
                 Ord per gång
             </label>
@@ -1228,6 +1259,9 @@ Poddcast</textarea>
         const animationMode = document.getElementById('animationMode');
         const speed = document.getElementById('speed');
         const randomizeDurationsBtn = document.getElementById('randomizeDurationsBtn');
+        const randomWordsMin = document.getElementById('randomWordsMin');
+        const randomWordsMax = document.getElementById('randomWordsMax');
+        const randomizeWordsBtn = document.getElementById('randomizeWordsBtn');
         const wordsPerFrame = document.getElementById('wordsPerFrame');
         const highlightWordsInput = document.getElementById('highlightWords');
         const cinematicDefaultDuration = document.getElementById('cinematicDefaultDuration');
@@ -1516,13 +1550,71 @@ Poddcast</textarea>
             });
         });
 
-        function getRandomizedSlideDuration(baseSpeed) {
+        function getRandomizedSlideDuration(baseSpeed, previousDuration = null, sequenceBias = 0) {
             const minDuration = 300;
             const maxDuration = 1000;
             const normalizedBase = Math.min(maxDuration, Math.max(minDuration, baseSpeed));
-            const spread = 220;
-            const randomized = normalizedBase + (Math.random() * 2 - 1) * spread;
+            const swing = (Math.random() * 2 - 1) * 260;
+            const drift = sequenceBias * 140;
+            const pullToBase = previousDuration === null ? 0 : (normalizedBase - previousDuration) * 0.45;
+            let randomized = normalizedBase + swing + drift + pullToBase;
+
+            if (Math.random() < 0.35) {
+                randomized += (Math.random() < 0.5 ? -1 : 1) * (90 + Math.random() * 170);
+            }
+
+            if (previousDuration !== null && Math.abs(randomized - previousDuration) < 90) {
+                randomized += (randomized >= previousDuration ? 1 : -1) * (90 + Math.random() * 140);
+            }
+
             return Math.round(Math.min(maxDuration, Math.max(minDuration, randomized)));
+        }
+
+        function getRandomizedSlideDurations(baseSpeed, count) {
+            const durations = [];
+            let previousDuration = null;
+            let sequenceBias = 0;
+            const normalizedBase = Math.min(1000, Math.max(300, baseSpeed));
+
+            for (let index = 0; index < count; index += 1) {
+                sequenceBias = clamp(sequenceBias * 0.55 + (Math.random() * 2 - 1) * 0.4, -1, 1);
+
+                if (Math.random() < 0.28) {
+                    sequenceBias = (Math.random() * 2 - 1) * 0.75;
+                }
+
+                let duration = getRandomizedSlideDuration(baseSpeed, previousDuration, sequenceBias);
+
+                if (index === count - 1 && count > 1) {
+                    duration = Math.round((duration + normalizedBase) / 2);
+                }
+
+                durations.push(duration);
+                previousDuration = duration;
+            }
+
+            return durations;
+        }
+
+        function normalizeRandomWordsRange() {
+            const parsedMin = parseInt(randomWordsMin.value, 10);
+            const parsedMax = parseInt(randomWordsMax.value, 10);
+            const safeMin = Number.isNaN(parsedMin) ? 1 : Math.min(20, Math.max(1, parsedMin));
+            const safeMax = Number.isNaN(parsedMax) ? 4 : Math.min(20, Math.max(1, parsedMax));
+            const normalizedMin = Math.min(safeMin, safeMax);
+            const normalizedMax = Math.max(safeMin, safeMax);
+
+            randomWordsMin.value = normalizedMin;
+            randomWordsMax.value = normalizedMax;
+
+            return {
+                min: normalizedMin,
+                max: normalizedMax
+            };
+        }
+
+        function getRandomWordsCount(minWords, maxWords) {
+            return minWords + Math.floor(Math.random() * ((maxWords - minWords) + 1));
         }
 
         function hexToRgb(hex) {
@@ -1568,6 +1660,16 @@ Poddcast</textarea>
             wordsPerFrame.value = safeValue;
             updateWordCount();
             drawFrame();
+        });
+
+        [randomWordsMin, randomWordsMax].forEach(control => {
+            control.addEventListener('input', () => {
+                normalizeRandomWordsRange();
+            });
+
+            control.addEventListener('change', () => {
+                normalizeRandomWordsRange();
+            });
         });
 
         [color1, color2, textColor, textShadowColor, textBandEnabled, textBandColor, fontFamily, transition, animationMode, highlightWordsInput, bgImageAnimation, textScale].forEach(control => {
@@ -1628,6 +1730,71 @@ Poddcast</textarea>
                         currentSlideWords.push(word);
 
                         if (currentSlideWords.length >= wordsCount || forceBreakAfter) {
+                            pushSlide(currentSlideWords);
+                            currentSlideWords = [];
+                        }
+                    });
+                });
+
+                pushSlide(currentSlideWords);
+            });
+
+            return {
+                slides: nextSlides,
+                ranges: nextRanges,
+                totalWords
+            };
+        }
+
+        function getRandomizedSlides(minWords, maxWords) {
+            const text = textInput.value.trim();
+            const nextSlides = [];
+            const nextRanges = [];
+            const segments = text
+                ? text.split(/\s*\/\/\/\s*/).map(part => part.split(/\s+/).filter(w => w.length > 0))
+                : [];
+            let totalWords = 0;
+            let wordStart = 1;
+            let targetWords = getRandomWordsCount(minWords, maxWords);
+
+            function pushSlide(words) {
+                if (words.length === 0) {
+                    return;
+                }
+
+                totalWords += words.length;
+                nextSlides.push(words);
+                nextRanges.push({
+                    start: wordStart,
+                    end: totalWords
+                });
+                wordStart = totalWords + 1;
+                targetWords = getRandomWordsCount(minWords, maxWords);
+            }
+
+            function expandToken(rawWord) {
+                const matches = rawWord.match(/\.+|[^.]+(?:\.+)?/g);
+
+                if (!matches || matches.length === 1) {
+                    return [{ word: rawWord, forceBreakAfter: false }];
+                }
+
+                return matches.map((part, index) => ({
+                    word: part,
+                    forceBreakAfter: part.includes('.') || index < matches.length - 1
+                }));
+            }
+
+            segments.forEach(segmentWords => {
+                let currentSlideWords = [];
+
+                segmentWords.forEach(rawWord => {
+                    const expandedWords = expandToken(rawWord);
+
+                    expandedWords.forEach(({ word, forceBreakAfter }) => {
+                        currentSlideWords.push(word);
+
+                        if (currentSlideWords.length >= targetWords || forceBreakAfter) {
                             pushSlide(currentSlideWords);
                             currentSlideWords = [];
                         }
@@ -2008,6 +2175,48 @@ Poddcast</textarea>
             buildTimeline(slides);
             updateTimelineActive();
             updateInspector();
+            drawFrame();
+        }
+
+        function applyRandomizedWordGrouping() {
+            if (slides.length === 0 || isPlaying || isRecording) {
+                return;
+            }
+
+            const { min, max } = normalizeRandomWordsRange();
+            const preservedSlides = slides
+                .map((slideWords, index) => ({
+                    words: [...slideWords],
+                    type: getSlideType(index),
+                    customText: slideCustomTexts[index] || '',
+                    duration: slideDurations[index],
+                    cinematicDuration: slideCinematicDurations[index]
+                }))
+                .filter(slide => slide.type !== 'standard');
+            const slideData = getRandomizedSlides(min, max);
+
+            slides = slideData.slides;
+            slideWordRanges = slideData.ranges;
+            wordCount.textContent = slideData.totalWords;
+            slideTypes = slides.map(() => 'standard');
+            slideCustomTexts = slides.map(() => '');
+            slideDurations = slides.map(() => null);
+            slideCinematicDurations = slides.map(() => null);
+
+            preservedSlides.forEach(slide => {
+                slides.push(slide.words);
+                slideTypes.push(slide.type);
+                slideCustomTexts.push(slide.customText);
+                slideDurations.push(Number.isFinite(slide.duration) ? slide.duration : null);
+                slideCinematicDurations.push(Number.isFinite(slide.cinematicDuration) ? slide.cinematicDuration : null);
+            });
+
+            rebuildSlideWordRanges();
+            syncSlideDurations();
+            buildTimeline(slides);
+            updateTimelineActive();
+            updateInspector();
+            drawFrame();
         }
 
         function buildTimeline(slides) {
@@ -2158,12 +2367,14 @@ Poddcast</textarea>
             }
 
             const baseSpeed = getGlobalSpeedValue();
-            slideDurations = slides.map(() => getRandomizedSlideDuration(baseSpeed));
+            slideDurations = getRandomizedSlideDurations(baseSpeed, slides.length);
             buildTimeline(slides);
             updateTimelineActive();
             updateInspector();
             maybePlaySelectedOutroPreview();
         });
+
+        randomizeWordsBtn.addEventListener('click', applyRandomizedWordGrouping);
 
         slideTextInput.addEventListener('input', () => {
             if (slides.length === 0 || isPlaying || isRecording) {
